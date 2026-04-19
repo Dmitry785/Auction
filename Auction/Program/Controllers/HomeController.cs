@@ -10,6 +10,7 @@ namespace Auction.Controllers
         [Route("")]
         public IActionResult Index()
         {
+            ViewBag.SelectedPageName = "Home";
             return View();
         }
         [ActionName("Details")]

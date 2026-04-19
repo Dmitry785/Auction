@@ -1,0 +1,49 @@
+﻿<div class="header-container">
+    <div class="icon">
+        Auction
+    </div>
+    <a>Home</a>
+    <a>About</a>
+    <a>Contacts</a>
+    <a>FAQ</a>
+    <a>Returm my money!!!</a>
+    <a>Account</a>
+</div>
+
+<style>
+    .header-container{
+        background-color: rgba(240, 240, 240, 0.8);
+        backdrop-filter: blur(2px);
+        height: 60px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        padding: 10px 50px 10px 10px;
+        gap: 10px;
+    }
+
+    .header-container a {
+        font-size: 20px;
+        font-weight: inherit;
+        text-decoration: inherit;
+        color: inherit;
+    }
+    .header-container .icon{
+        margin-right: auto;
+    }
+
+    .selectedPage {
+        text-decoration: underline !important;
+    }
+</style>
+
+<script>
+    const currentPageName = '@ViewBag.SelectedPageName.ToString()'
+    console.log(currentPageName);
+    $(function () {
+        $('a').filter(function () {
+            console.log($(this).text());
+            return $(this).text() === currentPageName
+        }).addClass('selectedPage');
+    });
+</script>
