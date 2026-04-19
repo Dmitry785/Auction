@@ -1,3 +1,9 @@
 ﻿body {
-    background: gray;
+    background: linear-gradient(-30deg, black, gray, darkgray, white, lightyellow);
+    background-size: cover;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+}
+main-content{
+    margin: 5px;
 }

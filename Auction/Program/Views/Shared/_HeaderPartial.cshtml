@@ -1,8 +1,8 @@
 ﻿<div class="header-container">
     <div class="icon">
-        Auction
+        <img src="~/images/icon.svg"/>
     </div>
-    <a>Home</a>
+    <a asp-controller="home" asp-action="index">Home</a>
     <a>About</a>
     <a>Contacts</a>
     <a>FAQ</a>
@@ -12,26 +12,30 @@
 
 <style>
     .header-container{
-        background-color: rgba(240, 240, 240, 0.8);
+        background-color: rgba(240, 240, 240, 0.4);
         backdrop-filter: blur(2px);
-        height: 60px;
+        min-height: 60px;
         display: flex;
         justify-content: flex-end;
         align-items: center;
         padding: 10px 50px 10px 10px;
-        gap: 10px;
+        gap: 20px;
     }
-
     .header-container a {
         font-size: 20px;
         font-weight: inherit;
         text-decoration: inherit;
         color: inherit;
     }
+    .header-container a:hover{
+
+    }
     .header-container .icon{
         margin-right: auto;
     }
-
+    .header-container .icon img{
+        height: 80px;
+    }
     .selectedPage {
         text-decoration: underline !important;
     }
