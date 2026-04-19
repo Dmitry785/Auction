@@ -3,12 +3,19 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Auction.Controllers
 {
-    [Route("{controller=home}/{action=index}")]
+    [Route("[controller]/[action]")]
     public class HomeController : Controller
     {
+        [Route("/")]
+        [Route("")]
         public IActionResult Index()
         {
             return View();
+        }
+        [ActionName("Details")]
+        public IActionResult Index2()
+        {
+            return Ok("View()");
         }
     }
 }
