@@ -3,10 +3,10 @@
         <img src="~/images/icon.svg"/>
     </div>
     <a asp-controller="home" asp-action="index">Home</a>
-    <a>About</a>
+    <a asp-controller="home" asp-action="about">About</a>
     <a>Contacts</a>
     <a>FAQ</a>
-    <a>Returm my money!!!</a>
+    <a href="https://finance.mail.ru/card/skam-1074/">Returm my money!!!</a>
     <a>Account</a>
 </div>
 
@@ -42,12 +42,16 @@
 </style>
 
 <script>
-    const currentPageName = '@ViewBag.SelectedPageName.ToString()'
+    const currentPageName = '@ViewBag.SelectedPageName?.ToString()'
     console.log(currentPageName);
     $(function () {
         $('a').filter(function () {
             console.log($(this).text());
             return $(this).text() === currentPageName
         }).addClass('selectedPage');
+        $('.icon').click(function () {
+            $(this).stop(true,false).animate({ opacity: 0.5 })
+            .animate({ opacity: 1 })
+        });
     });
 </script>
