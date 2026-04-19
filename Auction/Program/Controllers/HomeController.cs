@@ -13,10 +13,11 @@ namespace Auction.Controllers
             ViewBag.SelectedPageName = "Home";
             return View();
         }
-        [ActionName("Details")]
+        [ActionName("About")]
         public IActionResult Index2()
         {
-            return Ok("View()");
+            ViewBag.SelectedPageName = "About";
+            return View();
         }
     }
 }

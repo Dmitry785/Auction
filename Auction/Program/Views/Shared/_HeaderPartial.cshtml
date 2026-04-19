@@ -3,15 +3,16 @@
         <img src="~/images/icon.svg"/>
     </div>
     <a asp-controller="home" asp-action="index">Home</a>
-    <a>About</a>
+    <a asp-controller="home" asp-action="about">About</a>
     <a>Contacts</a>
     <a>FAQ</a>
-    <a>Returm my money!!!</a>
+    <a href="https://finance.mail.ru/card/skam-1074/">Returm my money!!!</a>
     <a>Account</a>
 </div>
 
 <style>
     .header-container{
+        box-shadow: 2px 1px  5px 5px gray;
         background-color: rgba(240, 240, 240, 0.4);
         backdrop-filter: blur(2px);
         min-height: 60px;
@@ -26,9 +27,11 @@
         font-weight: inherit;
         text-decoration: inherit;
         color: inherit;
+        transition: all 0.4s ease;
     }
     .header-container a:hover{
-
+        color: gray;
+        letter-spacing: 1px;
     }
     .header-container .icon{
         margin-right: auto;
@@ -42,12 +45,16 @@
 </style>
 
 <script>
-    const currentPageName = '@ViewBag.SelectedPageName.ToString()'
+    const currentPageName = '@ViewBag.SelectedPageName?.ToString()'
     console.log(currentPageName);
     $(function () {
         $('a').filter(function () {
             console.log($(this).text());
             return $(this).text() === currentPageName
         }).addClass('selectedPage');
+        $('.icon').click(function () {
+            $(this).stop(true,false).animate({ opacity: 0.5 })
+            .animate({ opacity: 1 })
+        });
     });
 </script>

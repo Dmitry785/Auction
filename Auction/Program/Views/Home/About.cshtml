@@ -1,0 +1,78 @@
+﻿@page
+@model Auction.ViewModels.HomeViewModel
+@{
+    ViewBag.Title = "About";
+}
+<div class="about-container">
+    <h1 class="about-header">
+        Trip Auction
+    </h1>
+    <span class="about-desc">
+        This auction not only provides a platform for exchanging items, but also an opportunity to freely manipulate your assets
+    </span>
+    <div class="about-features-container">
+        <div class="about-features-item">
+            <h1>
+                Complete Anonymity
+            </h1>
+            <span>
+                The platform stores only the necessary user information. Your information is not shared with third parties
+            </span>
+        </div>
+        <div class="about-features-item">
+            <h1>
+                A high-quality transaction
+            </h1>
+            <span>
+                You have complete control over the transaction process and the right to set your own terms
+            </span>
+        </div>
+    </div>
+    <span class="about-footer-desc">
+        Free trade allows you to find items that are hidden from the eyes of the regular market
+    </span>
+</div>
+<style>
+    .about-container{
+        background: rgba(255, 255, 255, 0.6);
+        border: 1px solid gray;
+        border-radius: 15px;
+        padding: 10px 20px 20px 20px;
+        margin: 10px 0
+    }
+
+    .about-header{
+        text-align: center;
+        font-size: 30px;
+    }
+
+    .about-desc {
+        font-size: 22px;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .about-footer-desc {
+        font-size: 22px;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-style: italic;
+    }
+    .about-features-container{
+        margin: 10px 0 40px 0;
+        display: flex;
+        gap: 30px;
+        padding: 10px 30px;
+    }
+    .about-features-item{
+        flex: 1 1 100px;
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid gray;
+        border-radius: 15px;
+        padding: 10px 20px;
+    }
+    .about-features-item h1{
+        font-size: 25px;
+    }
+    .about-features-item span{
+            font-size: 23px;
+    }
+</style>
