@@ -12,14 +12,12 @@ namespace Domain.Models
         public string Description { get; set; } = null!;
         public string? Poster { get; set; }
         public ItemType Type { get; set; }
-        public User Owner { get; set; } = null!;
-        public Item(string originalId, string name, string description, User owner, ItemType type, string? poster = null) 
+        public Item(string originalId, string name, string description, ItemType type, string? poster = null) 
         {
             Id = originalId;
             Name = name;
             Description = description;
             Poster = poster;
-            Owner = owner;
             Type = type;
         }
         public Item() 

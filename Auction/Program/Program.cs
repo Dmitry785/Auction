@@ -1,4 +1,5 @@
-
+using Application;
+using Infrastructure;
 namespace Auction
 {
     public class Program
@@ -8,6 +9,9 @@ namespace Auction
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllersWithViews();
+            builder.Services.AddInfastructureLayer(builder.Configuration);
+
+            builder.Services.AddApplicationLayer();
 
             var app = builder.Build();
 

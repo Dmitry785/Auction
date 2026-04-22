@@ -1,9 +1,32 @@
 ﻿@page
 @model Auction.ViewModels.HomeViewModel
+@using MediatR;
+@using Application.Logic.Lot;
+@inject IMediator mdtr;
 @{
     ViewBag.Title = "Home";
 }
-<h1>Hello</h1>
+<div class="lots-container">
+    @{
+        var lotsListResult = await mdtr.Send(new Application.Logic.Lot.GetAll.GetAllLotsQuery());
+        if (lotsListResult.Success)
+        {
+            foreach(var lot in lotsListResult.Data!)
+            {
+                <div data-id="@lot.Id" class="lot-item">
+                    <h1>Lot</h1>
+                    <h1>@lot.Id</h1>
+                </div>
+            }
+        }
+    }
+</div>
 
 <style>
+    .lots-container{
+
+    }
+    .lot-item{
+
+    }
 </style>
