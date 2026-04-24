@@ -14,6 +14,7 @@ namespace Infrastructure
     {
         public DbSet<Item> Items { get; set; }
         public DbSet<Lot> Lots { get; set; }
+        public DbSet<User> Users { get; set; }
         public AppDbContext(DbContextOptions<AppDbContext> options)
             :base(options)
         {
@@ -21,7 +22,7 @@ namespace Infrastructure
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+
         }
     }
 }

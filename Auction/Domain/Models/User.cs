@@ -1,0 +1,29 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Domain.Models
+{
+    public class User : BaseModel<Guid>
+    {
+        public string? OriginalId { get; set; }
+        public string Username { get; set; } = null!;
+        public List<WalletCurrency> Currencies { get; set; } = new List<WalletCurrency>();
+        public string Name { get; set; } = null!;
+        public int PasswordHash { get; set; }
+        public User(string username, string name, int passwordHash, List<WalletCurrency> currencies, string? originalId = null)
+        {
+            Id = Guid.NewGuid();
+            OriginalId = originalId;
+            Username = username;
+            Name = name;
+            PasswordHash = passwordHash;
+        }
+        public User()
+        {
+
+        }
+    }
+}
