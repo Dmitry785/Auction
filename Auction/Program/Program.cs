@@ -34,8 +34,8 @@ namespace Auction
 }
 public class DefaultDataHelper
 {
-    private readonly IAppDbContext _context;
-    public DefaultDataHelper(IAppDbContext context)
+    private readonly AppDbContext _context;
+    public DefaultDataHelper(AppDbContext context)
     {
         _context = context;
     }
@@ -47,12 +47,18 @@ public class DefaultDataHelper
         var item2 = new Item("2", "Item 2", "Item 2 desc", ItemType.Skin, user2);
         var item3 = new Item("3", "Item 3", "Item 3 desc", ItemType.Usual, user1);
         var lot1 = new Lot(item1, DateTime.Now, TimeSpan.FromHours(12), new Money(10, CurrencyType.RUB));
-        _context.Users.Add(user1);
-        _context.Users.Add(user2);
-        _context.Items.Add(item1);
-        _context.Items.Add(item2);
-        _context.Items.Add(item3);
-        _context.Lots.Add(lot1);
+        if(_context.Users.FirstOrDefault(x=>x.Id == user1.Id) is null)
+            _context.Users.Add(user1);
+        if (_context.Users.FirstOrDefault(x => x.Id == user2.Id) is null)
+            _context.Users.Add(user2);
+        if (_context.Items.FirstOrDefault(x => x.Id == item1.Id) is null)
+            _context.Items.Add(item1);
+        if (_context.Items.FirstOrDefault(x => x.Id == item2.Id) is null)
+            _context.Items.Add(item2);
+        if (_context.Items.FirstOrDefault(x => x.Id == item3.Id) is null)
+            _context.Items.Add(item3);
+        if (_context.Lots.FirstOrDefault(x => x.Id == lot1.Id) is null)
+            _context.Lots.Add(lot1);
         _context.SaveChanges();
     }
 }
