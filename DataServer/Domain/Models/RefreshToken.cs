@@ -8,9 +8,20 @@ namespace Domain.Models
 {
     public class RefreshToken : BaseModel<Guid>
     {
-        public Guid UserId { get; set; }
         public User User { get; set; } = null!;
+        public string Token { get; set; }
         public DateTime ExpireAt { get; set; }
         public bool IsExpired { get; set; }
+        public RefreshToken(User user, DateTime expireAt)
+        {
+            Id = Guid.NewGuid();
+            User = user;
+            ExpireAt = expireAt;
+            IsExpired = false;
+        }
+        public void SetExpired()
+        {
+            IsExpired = true;
+        }
     }
 }
