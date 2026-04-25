@@ -7,6 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Logic.Lot;
+namespace Application.Logic.User;
 
-public sealed record GetAllLotsQuery(Func<Domain.Models.Lot, bool>? predicate = null) : IRequest<List<Domain.Models.Lot>>;
+public sealed record GetUserByIdQuery(Guid Id) : IRequest<Result<Domain.Models.User>>;

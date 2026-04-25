@@ -7,6 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Logic.Lot;
+namespace Application.Logic.Item;
 
-public sealed record GetAllLotsQuery(Func<Domain.Models.Lot, bool>? predicate = null) : IRequest<List<Domain.Models.Lot>>;
+public sealed record GetAllItemsQuery(Func<Domain.Models.Item, bool>? predicate = null) : IRequest<List<Domain.Models.Item>>;

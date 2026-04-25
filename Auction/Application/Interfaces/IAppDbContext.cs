@@ -12,6 +12,7 @@ namespace Application.Interfaces
     {
         DbSet<Item> Items { get; set; }
         DbSet<Lot> Lots { get; set; }
+        DbSet<User> Users { get; set; }
         int SaveChanges();
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }

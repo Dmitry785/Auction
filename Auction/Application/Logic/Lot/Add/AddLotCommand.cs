@@ -9,4 +9,4 @@ using System.Threading.Tasks;
 
 namespace Application.Logic.Lot;
 
-public sealed record GetAllLotsQuery(Func<Domain.Models.Lot, bool>? predicate = null) : IRequest<List<Domain.Models.Lot>>;
+public sealed record AddLotCommand(Domain.Models.Lot Lot) : IRequest<Result<Guid>>;

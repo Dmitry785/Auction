@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Logic.Item.Add
-{
-    public sealed record AddItemCommand(Domain.Models.Item item) : IRequest<Result<string>>;
-}
+namespace Application.Logic.Item;
+
+public sealed record AddItemCommand(Domain.Models.Item Item) : IRequest<Result<string>>;

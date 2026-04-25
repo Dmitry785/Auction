@@ -14,12 +14,11 @@ namespace Domain.Models
         public Money? BuyoutPrice { get; set; }
         public Bet? CurrentBet { get; set; }
         public Money MinBetCurrency { get; set; } = null!;
-        public User Owner { get; set; } = null!;
         public TimeSpan TimeUntilClosing(DateTime currentTime)
         {
             return StartTime + Duration - currentTime;
         }
-        public Lot(Item itemInfo, DateTime startTime, TimeSpan duration, User owner, Money minBetCurrency, Money? buyoutPrice = null)
+        public Lot(Item itemInfo, DateTime startTime, TimeSpan duration, Money minBetCurrency, Money? buyoutPrice = null)
         {
             Id = Guid.NewGuid();
             ItemInfo = itemInfo;
@@ -27,7 +26,6 @@ namespace Domain.Models
             Duration = duration;
             BuyoutPrice = buyoutPrice;
             MinBetCurrency = minBetCurrency;
-            Owner = owner;
         }
         public Lot()
         {

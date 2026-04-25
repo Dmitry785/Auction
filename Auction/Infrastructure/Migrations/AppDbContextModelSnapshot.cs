@@ -30,6 +30,9 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Poster")
                         .HasColumnType("TEXT");
 
@@ -37,6 +40,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Items");
                 });
@@ -54,17 +59,12 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ItemInfoId");
-
-                    b.HasIndex("OwnerId");
 
                     b.ToTable("Lots");
                 });
@@ -91,6 +91,12 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("OriginalId")
+                        .IsUnique();
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
                     b.ToTable("Users");
                 });
 
@@ -116,17 +122,22 @@ namespace Infrastructure.Migrations
                     b.ToTable("WalletCurrency");
                 });
 
+            modelBuilder.Entity("Domain.Models.Item", b =>
+                {
+                    b.HasOne("Domain.Models.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+                });
+
             modelBuilder.Entity("Domain.Models.Lot", b =>
                 {
                     b.HasOne("Domain.Models.Item", "ItemInfo")
                         .WithMany()
                         .HasForeignKey("ItemInfoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Models.User", "Owner")
-                        .WithMany()
-                        .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -224,8 +235,6 @@ namespace Infrastructure.Migrations
 
                     b.Navigation("MinBetCurrency")
                         .IsRequired();
-
-                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("Domain.Models.WalletCurrency", b =>
