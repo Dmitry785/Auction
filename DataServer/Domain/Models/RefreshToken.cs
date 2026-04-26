@@ -9,7 +9,7 @@ namespace Domain.Models
     public class RefreshToken : BaseModel<Guid>
     {
         public User User { get; set; } = null!;
-        public string Token { get; set; }
+        public string Token { get; set; } = null!;
         public DateTime ExpireAt { get; set; }
         public bool IsExpired { get; set; }
         public RefreshToken(User user, DateTime expireAt)

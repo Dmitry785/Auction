@@ -9,12 +9,14 @@ namespace Domain.Models
     public class User : BaseModel<Guid>
     {
         public string Username { get; set; } = null!;
+        public string Name { get; set; } = null!;
         public int PasswordHash { get; set; }
         public List<RefreshToken> RefreshTokens { get; set; } = null!;
-        public User(string username, int hashPassword, List<RefreshToken> refreshTokens)
+        public User(string username, string name, int hashPassword, List<RefreshToken> refreshTokens)
         {
             Id = Guid.NewGuid();
             Username = username;
+            Name = name;
             PasswordHash = hashPassword;
             RefreshTokens = refreshTokens;
         }
