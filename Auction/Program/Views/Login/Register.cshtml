@@ -1,0 +1,44 @@
+@model string
+@{
+    ViewBag.Title = "Register";
+}
+<div class="container">
+    <form id="reg-form" asp-action="Register" method="post" asp-route-returnUrl="@Model">
+        <label for="login">Login</label>
+        <input name="login" id="login" />
+        <label for="name">Name</label>
+        <input name="name" id="name" />
+        <label for="password">Password</label>
+        <input name="password" type="password" id="password" />
+    </form>
+    <button type="submit" form="reg-form">Register</button>
+</div>
+
+<style>
+    .container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: fit-content;
+    }
+
+    #reg-form {
+        display: grid;
+        gap: 5px;
+        grid-auto-flow: row;
+        grid-template-columns: max-content 1fr;
+    }
+
+    reg-form label {
+        font-size: 20px;
+    }
+
+    reg-form input {
+        padding: 5px 30px;
+    }
+
+    .container button {
+        margin-left: auto;
+        padding: 5px 15px;
+    }
+</style>

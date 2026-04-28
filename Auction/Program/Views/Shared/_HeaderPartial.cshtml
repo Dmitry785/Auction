@@ -7,7 +7,7 @@
     <a>Contacts</a>
     <a>FAQ</a>
     <a href="https://finance.mail.ru/card/skam-1074/">Returm my money!!!</a>
-    <a>Account</a>
+    <a asp-controller="user" asp-action="index">Account</a>
 </div>
 
 <style>
@@ -27,7 +27,7 @@
         font-weight: inherit;
         text-decoration: inherit;
         color: inherit;
-        transition: all 0.4s ease;
+        transition: letter-spacing 0.4s ease;
     }
     .header-container a:hover{
         color: gray;
@@ -42,14 +42,36 @@
     .selectedPage {
         text-decoration: underline !important;
     }
+    @@media(max-width: 700px){
+        .header-container a {
+            font-size: 18px;
+        }
+        .header-container .icon img {
+            height: 60px;
+        }
+        .header-container{
+            gap: 10px;
+        }
+    }
+    @@media(max-width: 550px) {
+        .header-container a {
+            font-size: 14px;
+        }
+
+        .header-container .icon img {
+            height: 50px;
+        }
+
+        .header-container {
+            gap: 5px;
+        }
+    }
 </style>
 
 <script>
     const currentPageName = '@ViewBag.SelectedPageName?.ToString()'
-    console.log(currentPageName);
     $(function () {
         $('a').filter(function () {
-            console.log($(this).text());
             return $(this).text() === currentPageName
         }).addClass('selectedPage');
         $('.icon').click(function () {

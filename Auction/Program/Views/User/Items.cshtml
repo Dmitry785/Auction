@@ -1,0 +1,9 @@
+﻿@{
+    ViewBag.Title = "Items";
+}
+@using MediatR;
+@using Application.Logic.Lot;
+@inject Mediator mdtr;
+@{
+    var lotsList = await mdtr.Send(new GetAllLotsQuery());
+}

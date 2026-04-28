@@ -15,7 +15,7 @@ public sealed record GetUserByIdQueryHandler(IAppDbContext context) : IRequestHa
 {
     public async Task<Result<Domain.Models.User>> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
     {
-        var user = await context.Users.FirstOrDefaultAsync(x => x.Id == request.Id);
+        var user = await context.Users.Include(x => x.Currencies).FirstOrDefaultAsync(x => x.Id == request.Id);
         if (user is null)
             return Result<Domain.Models.User>.Fail();
         return Result.Ok(user);

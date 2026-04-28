@@ -15,7 +15,7 @@ public sealed record GetAllItemsQueryHandler(IAppDbContext context) : IRequestHa
 {
     public async Task<List<Domain.Models.Item>> Handle(GetAllItemsQuery request, CancellationToken cancellationToken)
     {
-        var items = await context.Items.AsNoTracking().ToListAsync();
+        var items = await context.Items.Include(x => x.Owner).AsNoTracking().ToListAsync();
         if (request.predicate is not null)
             items = items.Where(request.predicate!).ToList();
         return items;

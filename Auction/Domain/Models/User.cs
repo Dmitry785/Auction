@@ -12,8 +12,8 @@ namespace Domain.Models
         public string Username { get; set; } = null!;
         public List<WalletCurrency> Currencies { get; set; } = new List<WalletCurrency>();
         public string Name { get; set; } = null!;
-        public int PasswordHash { get; set; }
-        public User(string username, string name, int passwordHash, List<WalletCurrency> currencies, string? originalId = null)
+        public string PasswordHash { get; set; }
+        public User(string username, string name, string passwordHash, List<WalletCurrency> currencies, string? originalId = null)
         {
             Id = Guid.NewGuid();
             OriginalId = originalId;

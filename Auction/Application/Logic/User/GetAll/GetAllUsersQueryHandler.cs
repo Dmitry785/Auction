@@ -15,7 +15,7 @@ public sealed record GetAllUsersQueryHandler(IAppDbContext context) : IRequestHa
 {
     public async Task<List<Domain.Models.User>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
     {
-        var users = await context.Users.AsNoTracking().ToListAsync();
+        var users = await context.Users.Include(x=>x.Currencies).AsNoTracking().ToListAsync();
         if (request.predicate is not null)
             users = users.Where(request.predicate!).ToList();
         return users;

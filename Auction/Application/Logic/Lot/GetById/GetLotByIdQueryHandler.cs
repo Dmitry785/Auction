@@ -15,7 +15,7 @@ public sealed record GetLotByIdQueryHandler(IAppDbContext context) : IRequestHan
 {
     public async Task<Result<Domain.Models.Lot>> Handle(GetLotByIdQuery request, CancellationToken cancellationToken)
     {
-        var lot = await context.Lots.FirstOrDefaultAsync(x => x.Id == request.Id);
+        var lot = await context.Lots.Include(x => x.ItemInfo).FirstOrDefaultAsync(x => x.Id == request.Id);
         if (lot is null)
             return Result<Domain.Models.Lot>.Fail();
         return Result.Ok(lot);
