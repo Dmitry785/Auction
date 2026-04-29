@@ -1,7 +1,30 @@
 ﻿@{
     ViewBag.Title = "Contacts";
 }
-<h1>I2P network</h1>
-<span>http://auction.i2p</span>
-<h1>Onion network</h1>
-<span>http://ndslcmi2gweicjfdoupmbtjjlljogwdgy2y3artryfb6pn72wa7uwiqd.onion/</span>
+<div class="contact-links">
+    <h1>I2P network</h1>
+    <span>http://auction.i2p</span>
+    <h1>Onion network</h1>
+    <span>http://ndslcmi2gweicjfdoupmbtjjlljogwdgy2y3artryfb6pn72wa7uwiqd.onion/</span>
+</div>
+
+<style>
+    .contact-links{
+        display: flex;
+        flex-direction: column;
+        align-content: flex-start;
+    }
+    span {
+        overflow: hidden;
+        text-overflow: clip;
+        white-space: nowrap;
+    }
+    @@media(max-width: 500px) {
+        h1{
+            font-size: 16px;
+        }
+        span{
+            font-size: 14px;
+        }
+    }
+</style>

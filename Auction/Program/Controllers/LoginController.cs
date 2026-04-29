@@ -58,7 +58,7 @@ namespace Program.Controllers
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return Redirect(returnUrl);
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("User", "Index");
         }
         [HttpGet]
         public IActionResult Register([FromQuery] string? returnUrl)
@@ -94,7 +94,7 @@ namespace Program.Controllers
 
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return Redirect(returnUrl);
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("User", "Index");
         }
         [Authorize]
         [HttpGet]

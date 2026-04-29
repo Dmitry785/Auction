@@ -3,31 +3,38 @@
     ViewBag.Title = "Account";
 }
 <div class="profile-container">
-    <h1>
-        Username<br />
-        <span>@Model.Username</span>
-    </h1>
-    <h1>
-        Name<br />
-        <span>@Model.Username</span>
-    </h1>
-    <h1>
-        Register Date<br />
-        <span>@Model.RegisterDate.ToString()</span>
-    </h1>
-</div>
-<div class="profile-control">
-    <div class="profile-control-button">
-        Items
-        <a asp-action="Items"></a>
+    <div class="profile-info">
+        <h1>
+            Username<br />
+            <span>@Model.Username</span>
+        </h1>
+        <h1>
+            Name<br />
+            <span>@Model.Username</span>
+        </h1>
+        <h1>
+            Register Date<br />
+            <span>@Model.RegisterDate.ToString()</span>
+        </h1>
     </div>
-    <div class="profile-control-button">
-        Logout
-        <a asp-action="Logout" asp-controller="Login"></a>
+    <div class="profile-control">
+        <div class="profile-control-button">
+            Items
+            <a asp-action="Items"></a>
+        </div>
+        <div class="profile-control-button">
+            Logout
+            <a asp-action="Logout" asp-controller="Login"></a>
+        </div>
     </div>
 </div>
 
 <style>
+    .profile-container{
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: space-between;
+    }
     .profile-control-button{
         border: 1px solid gray;
         border-radius: 5px;
@@ -43,26 +50,30 @@
         background-color:blanchedalmond;
     }
     .profile-control{
-        float: left;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
     }
-    .profile-container{
-        float: right;
+    .profile-info {
         display: flex;
         gap: 10px;
     }
-    .profile-container h1{
+    .profile-info h1 {
         font-size: 24px;
     }
-    .profile-container h1 span{
+    .profile-info h1 span {
         font-size: 20px;
         font-weight: normal;
     }
-
     @@media(max-width: 600px) {
-        .profile-container h1 {
+        .profile-container {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .profile-info h1 {
             font-size: 22px;
         }
-        .profile-container h1 span{
+       .profile-info h1 span {
             font-size: 18px;
         }
     }
