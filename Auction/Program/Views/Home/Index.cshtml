@@ -10,20 +10,19 @@
         var lotsList = await mdtr.Send(new GetAllLotsQuery());
         foreach (var lot in lotsList)
         {
-            <div data-id="@lot.Id" class="lot-item" data-expire_at="@((lot.StartTime+lot.Duration).ToString("o"))">
-                <div class="lot-left-part-container">
-                    <img class="lot-item-poster" src="@lot.ItemInfo.Poster" alt="item image"/>
+                <div data-id="@lot.Id" class="lot-item" data-expire_at="@((lot.StartTime+lot.Duration).ToString("o"))">
+                    <div class="lot-left-part-container">
+                        <img class="lot-item-poster" src="@lot.ItemInfo.Poster" alt="item image"/>
+                    </div>
+                    <div class="lot-right-part-container">
+                        <h1 class="lot-item-name">@lot.ItemInfo.Name</h1>
+                        <h1 class="lot-item-owner">@lot.ItemInfo.Owner.Name</h1>
+                        <span class="lot-item-desc">
+                            @(lot.ItemInfo.Description.Length > 20 ? lot.ItemInfo.Description.Substring(0, 20) + ". . ." : lot.ItemInfo.Description)
+                        </span>
+                        <span class="lot-item-time_left">. . .</span>
+                    </div>
                 </div>
-                <div class="lot-right-part-container">
-                    <h1 class="lot-item-name">@lot.ItemInfo.Name</h1>
-                    <h1 class="lot-item-owner">@lot.ItemInfo.Owner.Name</h1>
-                    <span class="lot-item-desc">
-                        @(lot.ItemInfo.Description.Length > 20 ? lot.ItemInfo.Description.Substring(0, 20) + ". . ." : lot.ItemInfo.Description)
-                    </span>
-                    <span class="lot-item-time_left">. . .</span>
-                    <button class="view-button">View</button>
-                </div>
-            </div>
         }
     }
 </div>
@@ -44,17 +43,15 @@
     .lot-item.expired{
         color:gray;
     }
-    .view-button{
-        position:absolute;
-        bottom: 5px; left: 5px;
-        padding: 3px 10px;
-        font-size: 20px;
-    }
     .lot-left-part-container {
         flex: 2 1 0;
         box-sizing: border-box;
         min-width: 300px;
         background: darkgray;
+        display:flex;
+        align-items: center;
+        padding: 20px;
+        justify-content: center;
     }
     .lot-right-part-container{
         flex: 3 1 0;
@@ -64,9 +61,11 @@
     }
     .lot-item-poster{
         display: block;
+        object-position: center;
         overflow: hidden;
-        margin: 20px;
         object-fit: contain;
+        max-width: 100%;
+        max-height: 100%;
     }
     .lot-item-name {
         font-size: 24px;
@@ -118,33 +117,46 @@
         .lot-left-part-container {
             flex: 1 1 0;
             min-width: 150px;
+            padding: 10px;
         }
         .lot-item {
             height: 150px;
         }
     }
+    @@media(max-width: 400px){
+        .lot-left-part-container {
+            min-width: 100px;
+        }
+        .lot-left-part-container {
+            padding: 5px;
+        }
+    }
 </style>
 
 <script>
-    $(()=>{
+    $(() => {
         setInterval(function () {
-            $(".lot-item:not(.expired)").each(function (){
+            $(".lot-item:not(.expired)").each(function () {
                 console.log($(this));
                 const time = $(this).find('.lot-item-time_left');
                 let expires = new Date($(this).data("expire_at"));
                 let now = new Date();
                 let df = expires - now;
-                if(df<=0) {
+                if (df <= 0) {
                     $(this).addClass("expired")
                     time.text(`expired`)
                     return
                 }
                 const d = Math.floor(df / (1000 * 60 * 60 * 24));
                 const h = Math.floor((df / (1000 * 60 * 60)) % 24);
-                const m= Math.floor((df / 1000 / 60) % 60);
+                const m = Math.floor((df / 1000 / 60) % 60);
                 const s = Math.floor((df / 1000) % 60);
                 time.text(`${d}:${h}:${m}:${s}`);
             })
         }, 1000);
-    })
+        $('.lot-item-name').click(function () {
+            const id = $(this).closest('div[data-id]').data("id");
+            window.location.href = `/lot/${id}`;
+        });
+    });
 </script>

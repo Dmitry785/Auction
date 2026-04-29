@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Identity.Data;
 namespace Program.Controllers
 {
     [Route("authorization/[action]")]
-    public class LoginController(LoginService loginService) : Controller
+    public class LoginController(LoginService loginService, IMediator mdtr) : Controller
     {
         [HttpGet]
         [Route("/authorization")]
@@ -46,13 +46,16 @@ namespace Program.Controllers
                 new Claim(ClaimTypes.Name, loginRequest.Username),
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString())
             };
+            var getUserByIdResult = await mdtr.Send(new GetUserByIdQuery(userId));
+            if (getUserByIdResult.Success && getUserByIdResult.Data!.OriginalId is not null)
+                claims.Add(new Claim("linked_account_id", getUserByIdResult.Data!.OriginalId));
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
             var authProperties = new AuthenticationProperties { IsPersistent = true };
 
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity),
+                claimsPrincipal,
                 authProperties);
 
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
@@ -74,7 +77,7 @@ namespace Program.Controllers
             var userIdResult = await loginService.TryRegisterAsync(registerRequest.Username, registerRequest.Password, registerRequest.Name);
             if (userIdResult.Failed)
             {
-                ModelState.AddModelError("Validate", "Register failed");
+                ModelState.AddModelError("Validate", $"Username {registerRequest.Username} is already in use");
                 return View(registerRequest);
             }
             var userId = userIdResult.Data!;

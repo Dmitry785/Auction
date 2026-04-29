@@ -31,6 +31,14 @@ namespace Application.Services
             await context.SaveChangesAsync();
             return Result<Guid>.Ok(user.Id);
         }
+        public async Task LinkUser(Guid userId, string originalId)
+        {
+            var user = await context.Users.FirstOrDefaultAsync(x => x.Id == userId);
+            if (user is null)
+                return;
+            user.OriginalId = originalId;
+            await context.SaveChangesAsync();
+        }
         private string GetHashPassword(string password)
         {
             var bytes = Encoding.UTF8.GetBytes(password);

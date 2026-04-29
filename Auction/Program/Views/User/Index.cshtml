@@ -10,7 +10,7 @@
         </h1>
         <h1>
             Name<br />
-            <span>@Model.Username</span>
+            <span>@Model.Name</span>
         </h1>
         <h1>
             Register Date<br />
@@ -18,10 +18,19 @@
         </h1>
     </div>
     <div class="profile-control">
-        <div class="profile-control-button">
-            Items
-            <a asp-action="Items"></a>
-        </div>
+        @if (Context.User.FindFirst("linked_account_id") is not null)
+        {
+            <div class="profile-control-button">
+                Items
+                <a asp-action="Items"></a>
+            </div>
+        }
+        else{
+            <div class="profile-control-button">
+                Link Game Account
+                <a asp-action="LinkGameAccount"></a>
+            </div>
+        }
         <div class="profile-control-button">
             Logout
             <a asp-action="Logout" asp-controller="Login"></a>

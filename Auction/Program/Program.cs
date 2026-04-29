@@ -6,6 +6,7 @@ using Domain.Models;
 using Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.DependencyInjection;
 namespace Auction
 {
     public class Program
@@ -21,15 +22,24 @@ namespace Auction
             builder.Services.AddApplicationLayer();
 
             builder.Services.AddTransient<LoginService>();
-
             builder.Services.AddTransient<DefaultDataHelper>();
+            builder.Services.AddTransient(p=>new DataServerApiService("address"));
+
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(p =>
                 {
                     p.LoginPath = "/authorization";
+                    p.AccessDeniedPath = "/unauthorized";
                 });
+            builder.Services.AddAuthorization(opts =>
+            {
+                opts.AddPolicy("LinkedToTheOriginalAccount", p =>
+                {
+                    p.RequireClaim("linked_account_id");
+                });
+            });
 
             var app = builder.Build();
 
@@ -64,7 +74,7 @@ public class DefaultDataHelper
         _context.Database.EnsureCreated();
         var user1 = new User("u1", DateTime.Now, "u1 n", "erg", new List<WalletCurrency>() { new WalletCurrency(1111, CurrencyType.RUB)});
         var user2 = new User("u2", DateTime.Now, "u2 n", "egr", new List<WalletCurrency>() { new WalletCurrency(10, CurrencyType.RUB) });
-        var item1 = new Item("1", "Item 1", "Item 1 desc", ItemType.Usual, user2);
+        var item1 = new Item("1", "Item 1", "Item 1 descItem 1 descItem 1 descItem 1 descItem 1 descItem 1 descItem 1 descItem 1 descItem 1 descItem 1 descItem 1 descItem 1 descItem 1 descItem 1 descItem 1 desc", ItemType.Usual, user2, "https://fb.ru/misc/i/gallery/10682/1225582.jpg");
         var item2 = new Item("2", "Item 2", "Item 2 desc", ItemType.GameSkin, user2);
         var item3 = new Item("3", "Item 3", "Item 3 desc", ItemType.Usual, user1);
         var lot1 = new Lot(item1, DateTime.Now, TimeSpan.FromHours(12), new Money(10, CurrencyType.RUB));

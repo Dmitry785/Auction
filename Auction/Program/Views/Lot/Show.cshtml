@@ -1,0 +1,20 @@
+﻿@model Program.ViewModels.LotViewModel
+@{
+    ViewBag.Title = "Lot";
+}
+<div class="container">
+    <div>
+        <img src="@Model.Poster"/>
+    </div>
+    <div>
+        <h1>@Model.ItemName</h1>
+        <h1>@Model.ItemType</h1>
+        <h1>@Model.BuyoutPrice</h1>
+        <h1>@Model.MinBetCurrency.Amount</h1>
+        <h1>@Model.LastBetAmount</h1>
+        <h1>@Model.LastBetUserName</h1>
+        <h1>@Model.MinBetCurrency.Type</h1>
+        <h1>@Model.Description</h1>
+        <h1>@Model.OwnerName</h1>
+    </div>
+</div>

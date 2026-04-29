@@ -8,7 +8,6 @@ namespace Auction.Controllers
     public class HomeController : Controller
     {
         [Route("/")]
-        [Route("")]
         [HttpGet]
         public IActionResult Index()
         {
@@ -26,6 +25,12 @@ namespace Auction.Controllers
         public IActionResult Contacts()
         {
             ViewBag.SelectedPageName = "Contacts";
+            return View();
+        }
+        [HttpGet]
+        [Route("/unauthorized")]
+        public IActionResult UnauthorizedPage()
+        {
             return View();
         }
     }
