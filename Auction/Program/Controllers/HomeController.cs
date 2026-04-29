@@ -22,11 +22,5 @@ namespace Auction.Controllers
             ViewBag.SelectedPageName = "About";
             return View();
         }
-        [HttpGet]
-        public IActionResult Contacts()
-        {
-            ViewBag.SelectedPageName = "Contacts";
-            return View();
-        }
     }
 }

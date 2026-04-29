@@ -4,7 +4,7 @@
     </div>
     <a asp-controller="home" asp-action="index">Home</a>
     <a asp-controller="home" asp-action="about">About</a>
-    <a asp-controller="home" asp-action="contacts">Contacts</a>
+    <a>Contacts</a>
     <a>FAQ</a>
     <a href="https://finance.mail.ru/card/skam-1074/">Returm my money!!!</a>
     <a asp-controller="user" asp-action="index">Account</a>
@@ -71,9 +71,6 @@
     @@media(max-width: 400px) {
         .header-container a {
             font-size: 10px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: clip;
         }
         .header-container .icon img {
             height: 40px;
