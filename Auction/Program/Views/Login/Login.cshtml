@@ -1,18 +1,36 @@
-@model string
+@model Program.LoginRequest
 @{
     ViewBag.Title = "Login";
 }
 <div class="container">
-    <form id="login-form" asp-action="Login" method="post" asp-route-returnUrl="@Model">
-        <label for="login">Login</label>
-        <input name="login" id="login"/>
-        <label for="password">Password</label>
-        <input name="password" type="password" id="password" />
+    <div asp-validation-summary="All"></div>
+    <form id="login-form" asp-action="Login" method="post" asp-route-returnUrl="@(ViewBag.ReturnUrl ?? "/")">
+        <label asp-for="Username">Login</label>
+        <input asp-for="Username" />
+        <label asp-for ="Password">Password</label>
+        <input asp-for="Password" type="password"/>
     </form>
     <button type="submit" form="login-form">Login</button>
 </div>
 
 <style>
+    .field-validation-error {
+        color: red;
+    }
+
+    /* Input field */
+    input.input-validation-error {
+        border: 1px solid #b94a48;
+    }
+
+    input.valid {
+        border: 1px solid #16a085;
+    }
+
+    /* ValidationSummaryTagHelper */
+    .validation-summary-errors {
+        color: #b94a48;
+    }
     .container{
         display:flex;
         flex-direction: column;

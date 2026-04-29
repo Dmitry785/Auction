@@ -2,8 +2,14 @@
     ViewBag.Title = "Items";
 }
 @using MediatR;
-@using Application.Logic.Lot;
-@inject Mediator mdtr;
+@using Application.Logic.Item;
+@inject IMediator mdtr;
 @{
-    var lotsList = await mdtr.Send(new GetAllLotsQuery());
+    var itemsList = await mdtr.Send(new GetAllItemsQuery());
+    foreach(var item in itemsList)
+    {
+        <div>
+            @item.Name
+        </div>
+    }
 }

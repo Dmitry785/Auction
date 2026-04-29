@@ -9,11 +9,13 @@ using MediatR;
 using Application.Logic.User;
 using Domain.Models;
 using Application.Services;
+using Program.ViewModels;
+using Microsoft.AspNetCore.Identity.Data;
 
 namespace Program.Controllers
 {
     [Route("authorization/[action]")]
-    public class LoginController(AppDbContext context, LoginService loginService) : Controller
+    public class LoginController(LoginService loginService) : Controller
     {
         [HttpGet]
         [Route("/authorization")]
@@ -24,14 +26,20 @@ namespace Program.Controllers
         [HttpGet]
         public IActionResult Login([FromQuery] string? returnUrl)
         {
-            return View("Login", returnUrl ?? string.Empty);
+            ViewBag.ReturnUrl = returnUrl ?? "/";
+            return View(new LoginRequest(string.Empty, string.Empty));
         }
         [HttpPost]
         public async Task<IActionResult> Login([FromQuery]string? returnUrl, [FromForm]LoginRequest loginRequest)
         {
+            if (!ModelState.IsValid)
+                return View(loginRequest);
             var userIdResult = await loginService.TryLoginAsync(loginRequest.Username, loginRequest.Password);
             if (userIdResult.Failed)
-                return Unauthorized("Wrong password or login");
+            {
+                ModelState.AddModelError("Validate", "Wrong password or login");
+                return View(loginRequest);
+            }
             var userId = userIdResult.Data!;
             var claims = new List<Claim>
             {
@@ -55,14 +63,20 @@ namespace Program.Controllers
         [HttpGet]
         public IActionResult Register([FromQuery] string? returnUrl)
         {
-            return View("Register", returnUrl ?? string.Empty);
+            ViewBag.ReturnUrl = returnUrl ?? "/";
+            return View(new RegisterRequest(string.Empty, string.Empty, string.Empty));
         }
         [HttpPost]
         public async Task<IActionResult> Register([FromQuery] string? returnUrl, [FromForm] RegisterRequest registerRequest)
         {
+            if (!ModelState.IsValid)
+                return View(registerRequest);
             var userIdResult = await loginService.TryRegisterAsync(registerRequest.Username, registerRequest.Password, registerRequest.Name);
             if (userIdResult.Failed)
-                return Unauthorized("Register failed");
+            {
+                ModelState.AddModelError("Validate", "Register failed");
+                return View(registerRequest);
+            }
             var userId = userIdResult.Data!;
             var claims = new List<Claim>
             {
@@ -86,11 +100,8 @@ namespace Program.Controllers
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            if (!Guid.TryParse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out Guid userId))
-                return BadRequest();
-            if(await context.Users.FirstOrDefaultAsync(x=>x.Id == userId) is null)
-                return BadRequest();
-            return SignOut();
+            await HttpContext.SignOutAsync();
+            return RedirectToAction("Index", "Home");
         }
     }
 }

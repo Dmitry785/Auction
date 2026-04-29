@@ -1,7 +1,69 @@
-﻿@page
+﻿@model Program.ViewModels.UserViewModel
 @{
     ViewBag.Title = "Account";
 }
-<div>
-    <h1>Hello</h1>
+<div class="profile-container">
+    <h1>
+        Username<br />
+        <span>@Model.Username</span>
+    </h1>
+    <h1>
+        Name<br />
+        <span>@Model.Username</span>
+    </h1>
+    <h1>
+        Register Date<br />
+        <span>@Model.RegisterDate.ToString()</span>
+    </h1>
 </div>
+<div class="profile-control">
+    <div class="profile-control-button">
+        Items
+        <a asp-action="Items"></a>
+    </div>
+    <div class="profile-control-button">
+        Logout
+        <a asp-action="Logout" asp-controller="Login"></a>
+    </div>
+</div>
+
+<style>
+    .profile-control-button{
+        border: 1px solid gray;
+        border-radius: 5px;
+        padding: 3px 15px;
+        font-size: 20px;
+        position: relative
+    }
+    .profile-control-button a{
+        position: absolute;
+        top: 0; bottom: 0;left: 0;right: 0;
+    }
+    .profile-control-button:hover{
+        background-color:blanchedalmond;
+    }
+    .profile-control{
+        float: left;
+    }
+    .profile-container{
+        float: right;
+        display: flex;
+        gap: 10px;
+    }
+    .profile-container h1{
+        font-size: 24px;
+    }
+    .profile-container h1 span{
+        font-size: 20px;
+        font-weight: normal;
+    }
+
+    @@media(max-width: 600px) {
+        .profile-container h1 {
+            font-size: 22px;
+        }
+        .profile-container h1 span{
+            font-size: 18px;
+        }
+    }
+</style>

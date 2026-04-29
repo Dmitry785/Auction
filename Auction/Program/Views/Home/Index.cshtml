@@ -10,20 +10,20 @@
         var lotsList = await mdtr.Send(new GetAllLotsQuery());
         foreach (var lot in lotsList)
         {
-                    <div data-id="@lot.Id" class="lot-item" data-expire_at="@((lot.StartTime+lot.Duration).ToString("o"))">
-                        <div class="lot-left-part-container">
-                            <img class="lot-item-poster" src="@lot.ItemInfo.Poster" alt="item image"/>
-                        </div>
-                        <div class="lot-right-part-container">
-                            <h1 class="lot-item-name">@lot.ItemInfo.Name</h1>
-                            <h1 class="lot-item-owner">@lot.ItemInfo.Owner.Name</h1>
-                            <span class="lot-item-desc">
-                                @(lot.ItemInfo.Description.Length > 20 ? lot.ItemInfo.Description.Substring(0, 20) + ". . ." : lot.ItemInfo.Description)
-                            </span>
-                            <span class="lot-item-time_left">31:20</span>
-                            <button class="view-button">View</button>
-                        </div>
-                    </div>
+            <div data-id="@lot.Id" class="lot-item" data-expire_at="@((lot.StartTime+lot.Duration).ToString("o"))">
+                <div class="lot-left-part-container">
+                    <img class="lot-item-poster" src="@lot.ItemInfo.Poster" alt="item image"/>
+                </div>
+                <div class="lot-right-part-container">
+                    <h1 class="lot-item-name">@lot.ItemInfo.Name</h1>
+                    <h1 class="lot-item-owner">@lot.ItemInfo.Owner.Name</h1>
+                    <span class="lot-item-desc">
+                        @(lot.ItemInfo.Description.Length > 20 ? lot.ItemInfo.Description.Substring(0, 20) + ". . ." : lot.ItemInfo.Description)
+                    </span>
+                    <span class="lot-item-time_left">. . .</span>
+                    <button class="view-button">View</button>
+                </div>
+            </div>
         }
     }
 </div>
@@ -40,6 +40,9 @@
         gap: 30px;
         padding: 10px 20px;
         border-bottom: 1px solid black;
+    }
+    .lot-item.expired{
+        color:gray;
     }
     .view-button{
         position:absolute;
@@ -125,12 +128,14 @@
 <script>
     $(()=>{
         setInterval(function () {
-            $(".lot-item").each(function (){
+            $(".lot-item:not(.expired)").each(function (){
+                console.log($(this));
                 const time = $(this).find('.lot-item-time_left');
                 let expires = new Date($(this).data("expire_at"));
                 let now = new Date();
                 let df = expires - now;
                 if(df<=0) {
+                    $(this).addClass("expired")
                     time.text(`expired`)
                     return
                 }

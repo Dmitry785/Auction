@@ -62,8 +62,8 @@ public class DefaultDataHelper
     {
         _context.Database.EnsureDeleted();
         _context.Database.EnsureCreated();
-        var user1 = new User("u1", "u1 n", "erg", new List<WalletCurrency>() { new WalletCurrency(1111, CurrencyType.RUB)});
-        var user2 = new User("u2", "u2 n", "egr", new List<WalletCurrency>() { new WalletCurrency(10, CurrencyType.RUB) });
+        var user1 = new User("u1", DateTime.Now, "u1 n", "erg", new List<WalletCurrency>() { new WalletCurrency(1111, CurrencyType.RUB)});
+        var user2 = new User("u2", DateTime.Now, "u2 n", "egr", new List<WalletCurrency>() { new WalletCurrency(10, CurrencyType.RUB) });
         var item1 = new Item("1", "Item 1", "Item 1 desc", ItemType.Usual, user2);
         var item2 = new Item("2", "Item 2", "Item 2 desc", ItemType.GameSkin, user2);
         var item3 = new Item("3", "Item 3", "Item 3 desc", ItemType.Usual, user1);

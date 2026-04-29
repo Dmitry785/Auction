@@ -26,7 +26,7 @@ namespace Application.Services
             var user = await context.Users.FirstOrDefaultAsync(x => x.Username ==username);
             if (user is not null)
                 return Result<Guid>.Fail();
-            user = (await context.Users.AddAsync(new User(username, 
+            user = (await context.Users.AddAsync(new User(username, DateTime.Now,
                 name, GetHashPassword(password), new List<WalletCurrency>()))).Entity;
             await context.SaveChangesAsync();
             return Result<Guid>.Ok(user.Id);
