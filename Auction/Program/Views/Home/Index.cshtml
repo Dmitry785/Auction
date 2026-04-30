@@ -1,28 +1,24 @@
-﻿@model Auction.ViewModels.HomeViewModel
-@using MediatR;
-@using Application.Logic.Lot;
-@inject IMediator mdtr;
+﻿@model Program.ViewModels.HomeViewModel
 @{
     ViewBag.Title = "Home";
 }
 <div class="lots-container">
     @{
-        var lotsList = await mdtr.Send(new GetAllLotsQuery());
-        foreach (var lot in lotsList)
+        foreach (var lot in @Model.Lots)
         {
-                        <div data-id="@lot.Id" class="lot-item" data-expire_at="@((lot.StartTime+lot.Duration).ToString("o"))">
-                            <div class="lot-left-part-container">
-                                <img class="lot-item-poster" src="@lot.ItemInfo.Poster" alt="item image"/>
-                            </div>
-                            <div class="lot-right-part-container">
-                                <h1 class="lot-item-name">@lot.ItemInfo.Name</h1>
-                                <h1 class="lot-item-owner">@lot.ItemInfo.Owner.Name</h1>
-                                <span class="lot-item-desc">
-                                    @(lot.ItemInfo.Description.Length > 20 ? lot.ItemInfo.Description.Substring(0, 20) + ". . ." : lot.ItemInfo.Description)
-                                </span>
-                                <span class="lot-item-time_left">. . .</span>
-                            </div>
-                    </div>
+            <div data-id="@lot.Id" class="lot-item" data-expire_at="@lot.ExpiresAt.ToString("o")">
+                <div class="lot-left-part-container">
+                    <img class="lot-item-poster" src="@lot.Poster" alt="item image"/>
+                </div>
+                <div class="lot-right-part-container">
+                    <h1 class="lot-item-name">@lot.ItemName</h1>
+                    <h1 class="lot-item-owner">@lot.OwnerUsername</h1>
+                    <span class="lot-item-desc">
+                        @(lot.ItemDescription.Length > 20 ? lot.ItemDescription.Substring(0, 20) + ". . ." : lot.ItemDescription)
+                    </span>
+                    <span class="lot-item-time_left">. . .</span>
+                </div>
+            </div>
         }
     }
 </div>

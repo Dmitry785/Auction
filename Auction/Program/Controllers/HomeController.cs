@@ -1,19 +1,25 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Application.Logic.Lot;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Program.ViewModels;
+using Program.ViewModels.Dto;
 
 namespace Auction.Controllers
 {
     [Route("[controller]/[action]")]
-    public class HomeController : Controller
+    public class HomeController(IMediator mdtr) : Controller
     {
         [Route("/")]
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             ViewBag.SelectedPageName = "Home";
-            return View();
+            var lots = (await mdtr.Send(new GetAllLotsQuery()))
+                .Select(x => new LotDto(x.StartTime + x.Duration, x.Id, x.ItemInfo.Name,
+                x.ItemInfo.Owner.Username, x.ItemInfo.Description, x.ItemInfo.Poster)).ToList();
+            return View(new HomeViewModel(lots));
         }
         [ActionName("About")]
         [HttpGet]

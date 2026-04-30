@@ -2,4 +2,4 @@
 
 namespace Program.ViewModels;
 
-public sealed record HomeViewModel(List<LotDto> Lots);
+public sealed record ItemsViewModel(List<ItemDto> Items);

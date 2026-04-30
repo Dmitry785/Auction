@@ -7,6 +7,7 @@ using Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.DependencyInjection;
+using System.Security.Claims;
 namespace Auction
 {
     public class Program
@@ -89,5 +90,13 @@ public class DefaultDataHelper
         _context.Lots.Add(lot1);
         _context.Lots.Add(lot2);
         _context.SaveChanges();
+    }
+}
+public static class ClaimsPrincipalExtensions
+{
+    public static Guid GetUserId(this ClaimsPrincipal principal)
+    {
+        return Guid.TryParse(principal.FindFirstValue(ClaimTypes.NameIdentifier), out Guid userId) 
+            ? userId : Guid.Empty;
     }
 }

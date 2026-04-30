@@ -1,0 +1,12 @@
+﻿@model Program.ViewModels.ItemsViewModel
+@{
+    ViewBag.Title = "Items";
+}
+@{
+    foreach(var item in Model.Items)
+    {
+        <div>
+            @item.ItemName
+        </div>
+    }
+}

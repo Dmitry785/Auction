@@ -27,9 +27,38 @@ namespace Program.Controllers
             var lot = (await mdtr.Send(new GetLotByIdQuery(id))).Data;
             if (lot is null)
                 return RedirectToAction("Index", "Home");
+            var userId = HttpContext.User.GetUserId();
+            await Console.Out.WriteLineAsync(userId.ToString());
+            bool isAuthorized = false;
+            bool canUserBuyout = false;
+            bool canUserBet = false;
+            decimal? minBet = null;
+            WalletCurrency? betCurrency = null;
+            if (userId != Guid.Empty) {
+                isAuthorized = true;
+                var user = (await mdtr.Send(new GetUserByIdQuery(userId))).Data;
+                if (user is not null)
+                {
+                    betCurrency = user.Currencies.FirstOrDefault(x => x.Type == lot.MinBetCurrency.Type);
+                    minBet = (lot.CurrentBet?.BetAmount.Amount ?? 0) + lot.MinBetCurrency.Amount;
+                    if (betCurrency is not null && betCurrency.Amount >= minBet)
+                    {
+                        canUserBet = true;
+                    }
+                    if(lot.BuyoutPrice is not null)
+                    {
+                        var buyoutCurrency = user.Currencies.FirstOrDefault(x => x.Type == lot.BuyoutPrice.Type);
+                        if(buyoutCurrency is not null && buyoutCurrency.Amount >= lot.BuyoutPrice.Amount)
+                        {
+                            canUserBuyout = true;
+                        }
+                    }
+                }
+            }
             return View(new LotViewModel(lot.ItemInfo.Name, lot.ItemInfo.Description,
                 lot.ItemInfo.Poster, lot.ItemInfo.Type, lot.ItemInfo.Owner.Name, lot.BuyoutPrice, lot.MinBetCurrency,
-                lot.CurrentBet?.BetAmount, lot.CurrentBet?.BetParticipant.Name, lot.StartTime + lot.Duration));
+                lot.CurrentBet?.BetAmount, lot.CurrentBet?.BetParticipant.Name, lot.StartTime + lot.Duration,
+                isAuthorized, canUserBet, canUserBuyout, minBet, betCurrency?.Amount));
         }
         [Route("{id:guid}/buyout")]
         [Authorize(Policy = "LinkedToTheOriginalAccount")]
@@ -38,7 +67,8 @@ namespace Program.Controllers
             var lot = (await mdtr.Send(new GetLotByIdQuery(id))).Data;
             if (lot is null || lot.BuyoutPrice is null)
                 return RedirectToAction("Index", "Home");
-            if(!Guid.TryParse(HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid userId))
+            var userId = HttpContext.User.GetUserId();
+            if (userId == Guid.Empty)
                 return RedirectToAction("Index", "Login");
             var paymentResult = await paymentService.WithdrawMoney(userId, lot.BuyoutPrice);
             if (paymentResult.Failed)

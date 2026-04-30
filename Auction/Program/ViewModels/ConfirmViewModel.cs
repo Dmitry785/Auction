@@ -1,4 +1,3 @@
-﻿namespace Program.ViewModels
-{
-    public sealed record ConfirmViewModel(string DestinationUrl, string? Message);
-}
+﻿namespace Program.ViewModels;
+
+public sealed record ConfirmViewModel(string DestinationUrl, string? Message);

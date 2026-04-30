@@ -17,16 +17,19 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Program.Controllers
 {
-    public class UserController(IMediator mdtr) : Controller
+    public class ItemController(IMediator mdtr) : Controller
     {
-        [Route("{id:guid}")]
-        public async Task<IActionResult> Show([FromRoute] Guid id)
+        [Route("{id}")]
+        public async Task<IActionResult> Show([FromRoute] string id)
         {
             Console.WriteLine(id.ToString());
-            var user = (await mdtr.Send(new GetUserByIdQuery(id))).Data;
-            if (user is null)
+            var item = (await mdtr.Send(new GetItemByIdQuery(id))).Data;
+            if (item is null)
                 return RedirectToAction("Index", "Home");
-            return View(new UserViewModel(user.Username, user.Name, user.RegisterDate));
+            var lot = (await mdtr.Send(new GetAllLotsQuery(x => x.ItemInfo.Id == item.Id))).FirstOrDefault();
+            return View(new ItemViewModel(new ViewModels.Dto.ItemDto(item.Name, item.Description, 
+                lot is null?null:Url.Action("show", "lot", new { id = lot.Id}), 
+                item.Poster, item.Owner.Username, item.Type.ToString())));
         }
     }
 }
