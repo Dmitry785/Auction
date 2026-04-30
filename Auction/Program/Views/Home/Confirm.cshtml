@@ -1,0 +1,50 @@
+﻿@model Program.ViewModels.ConfirmViewModel
+@{
+    ViewBag.Title = "Confirm";
+}
+<h1 class="confirm-message">@(Model.Message ?? "Do you confirm?")</h1>
+<div class="confirm-choise-container">
+    <div class="confirm-choise">
+        Yes
+        <a href="@Model.DestinationUrl"></a>
+    </div>
+    <div class="confirm-choise">
+        Cancel
+        <a onclick="window.history.back();"></a>
+    </div>
+</div>
+
+<style>
+    .confirm-message{
+        font-size: 30px;
+        font-weight: normal;
+        text-align: center;
+    }
+    .confirm-choise-container{
+        display: flex;
+        gap: 20px;
+        justify-content: space-around;
+    }
+    .confirm-choise{
+        flex: 1 1 0;
+        padding: 20px 40px;
+        border: 1px solid black;
+        min-width: 100px;
+        position: relative;
+    }
+    .confirm-choise a{
+            position: absolute;
+            top: 0;left: 0; right: 0;bottom: 0;
+    }
+    .confirm-choise:first-child:hover {
+        border: 3px solid green;
+    }
+    .confirm-choise:nth-child(2):hover {
+        border: 3px solid red;
+    }
+    @@media(max-width: 500px){
+        .confirm-choise-container {
+            flex-direction: column;
+        }
+    }
+</style>

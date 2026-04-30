@@ -23,6 +23,7 @@ namespace Auction
 
             builder.Services.AddTransient<LoginService>();
             builder.Services.AddTransient<DefaultDataHelper>();
+            builder.Services.AddTransient<PaymentService>();
             builder.Services.AddTransient(p=>new DataServerApiService("address"));
 
             builder.Services.AddSwaggerGen();
@@ -74,11 +75,12 @@ public class DefaultDataHelper
         _context.Database.EnsureCreated();
         var user1 = new User("u1", DateTime.Now, "u1 n", "erg", new List<WalletCurrency>() { new WalletCurrency(1111, CurrencyType.RUB)});
         var user2 = new User("u2", DateTime.Now, "u2 n", "egr", new List<WalletCurrency>() { new WalletCurrency(10, CurrencyType.RUB) });
-        var item1 = new Item("1", "Item 1", "Item 1 descItem 1 descItem 1 descItem 1 descItem 1 descItem 1 descItem 1 descItem 1 descItem 1 descItem 1 descItem 1 descItem 1 descItem 1 descItem 1 descItem 1 desc", ItemType.Usual, user2, "https://fb.ru/misc/i/gallery/10682/1225582.jpg");
-        var item2 = new Item("2", "Item 2", "Item 2 desc", ItemType.GameSkin, user2);
+        var item1 = new Item("1", "Item 1", "Item 1 desc", ItemType.Usual, user2, "https://fb.ru/misc/i/gallery/10682/1225582.jpg");
+        var item2 = new Item("2", "Item 2", "Item 2 desc", ItemType.GameSkin, user2, "/images/items/cannabis.jpg");
         var item3 = new Item("3", "Item 3", "Item 3 desc", ItemType.Usual, user1);
-        var lot1 = new Lot(item1, DateTime.Now, TimeSpan.FromHours(12), new Money(10, CurrencyType.RUB));
+        var lot1 = new Lot(item1, DateTime.Now, TimeSpan.FromHours(12), new Money(10, CurrencyType.RUB), new Money(10000, CurrencyType.BTC));
         var lot2 = new Lot(item2, DateTime.Now, TimeSpan.FromSeconds(30), new Money(100, CurrencyType.RUB));
+        lot1.CurrentBet = new Bet(user2, new Money(111, CurrencyType.RUB));
         _context.Users.Add(user1);
         _context.Users.Add(user2);
         _context.Items.Add(item1);

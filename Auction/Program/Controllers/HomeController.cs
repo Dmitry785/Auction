@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Program.ViewModels;
 
 namespace Auction.Controllers
 {
@@ -29,9 +30,17 @@ namespace Auction.Controllers
         }
         [HttpGet]
         [Route("/unauthorized")]
+        [ActionName("Unauthorized")]
         public IActionResult UnauthorizedPage()
         {
             return View();
+        }
+        [HttpGet]
+        [Route("/confirm")]
+        [ActionName("Confirm")]
+        public IActionResult ConfirmPage([FromQuery(Name = "to")]string destinationUrl, [FromQuery]string message)
+        {
+            return View(new ConfirmViewModel(destinationUrl, message));
         }
     }
 }

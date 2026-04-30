@@ -10,134 +10,138 @@
         var lotsList = await mdtr.Send(new GetAllLotsQuery());
         foreach (var lot in lotsList)
         {
-                <div data-id="@lot.Id" class="lot-item" data-expire_at="@((lot.StartTime+lot.Duration).ToString("o"))">
-                    <div class="lot-left-part-container">
-                        <img class="lot-item-poster" src="@lot.ItemInfo.Poster" alt="item image"/>
+                        <div data-id="@lot.Id" class="lot-item" data-expire_at="@((lot.StartTime+lot.Duration).ToString("o"))">
+                            <div class="lot-left-part-container">
+                                <img class="lot-item-poster" src="@lot.ItemInfo.Poster" alt="item image"/>
+                            </div>
+                            <div class="lot-right-part-container">
+                                <h1 class="lot-item-name">@lot.ItemInfo.Name</h1>
+                                <h1 class="lot-item-owner">@lot.ItemInfo.Owner.Name</h1>
+                                <span class="lot-item-desc">
+                                    @(lot.ItemInfo.Description.Length > 20 ? lot.ItemInfo.Description.Substring(0, 20) + ". . ." : lot.ItemInfo.Description)
+                                </span>
+                                <span class="lot-item-time_left">. . .</span>
+                            </div>
                     </div>
-                    <div class="lot-right-part-container">
-                        <h1 class="lot-item-name">@lot.ItemInfo.Name</h1>
-                        <h1 class="lot-item-owner">@lot.ItemInfo.Owner.Name</h1>
-                        <span class="lot-item-desc">
-                            @(lot.ItemInfo.Description.Length > 20 ? lot.ItemInfo.Description.Substring(0, 20) + ". . ." : lot.ItemInfo.Description)
-                        </span>
-                        <span class="lot-item-time_left">. . .</span>
-                    </div>
-                </div>
         }
     }
 </div>
 
 <style>
     .lots-container{
-        display: flex;
-        flex-direction: column;
-        gap: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
     }
     .lot-item{
-        display: flex;
-        height: 300px;
-        gap: 30px;
-        padding: 10px 20px;
-        border-bottom: 1px solid black;
+    display: flex;
+    height: 300px;
+    gap: 30px;
+    padding: 10px 20px;
+    border-bottom: 1px solid black;
     }
     .lot-item.expired{
-        color:gray;
+    color:gray;
     }
     .lot-left-part-container {
-        flex: 2 1 0;
-        box-sizing: border-box;
-        min-width: 300px;
-        background: darkgray;
-        display:flex;
-        align-items: center;
-        padding: 20px;
-        justify-content: center;
+    flex: 2 1 0;
+    box-sizing: border-box;
+    min-width: 300px;
+    background: darkgray;
+    display:flex;
+    align-items: center;
+    padding: 20px;
+    justify-content: center;
     }
     .lot-right-part-container{
-        flex: 3 1 0;
-        box-sizing: border-box;
-        min-width: 0;
-        position: relative;
+    flex: 3 1 0;
+    box-sizing: border-box;
+    min-width: 0;
+    position: relative;
     }
     .lot-item-poster{
-        display: block;
-        object-position: center;
-        overflow: hidden;
-        object-fit: contain;
-        max-width: 100%;
-        max-height: 100%;
+    display: block;
+    object-position: center;
+    overflow: hidden;
+    object-fit: contain;
+    max-width: 100%;
+    max-height: 100%;
     }
     .lot-item-name {
-        font-size: 24px;
-        letter-spacing: 2px;
-        overflow: hidden;
-        margin-top: 2px;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        cursor: pointer;
+    font-size: 24px;
+    letter-spacing: 2px;
+    overflow: hidden;
+    margin-top: 2px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    cursor: pointer;
     }
 
     .lot-item-desc {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-height: 30px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 30px;
     }
     .lot-item-owner {
-        font-size: 20px;
-        margin-left: 5px;
-        letter-spacing: 1px;
-        color: gray;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        cursor: pointer;
+    font-size: 20px;
+    margin-left: 5px;
+    letter-spacing: 1px;
+    color: gray;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    cursor: pointer;
     }
     .lot-item-time_left{
-        position: absolute;
-        bottom: 5px; right: 5px;
-        font-style: italic;
-        font-size: 20px;
+    position: absolute;
+    bottom: 5px; right: 5px;
+    font-style: italic;
+    font-size: 20px;
     }
 
     @@media(max-width: 700px) {
-        .lot-item {
-            height: 200px;
-        }
+    .lot-item {
+    height: 200px;
+    }
     }
     @@media(max-width: 600px){
-        .lot-item-time_left, 
-        .lot-item-owner, 
-        .view-button {
-            font-size: 16px;
-        }
+    .lot-item-time_left, 
+    .lot-item-owner, 
+    .view-button {
+    font-size: 16px;
+    }
 
-        .lot-item-name{
-            font-size: 20px;
-        }
-        .lot-left-part-container {
-            flex: 1 1 0;
-            min-width: 150px;
-            padding: 10px;
-        }
-        .lot-item {
-            height: 150px;
-        }
+    .lot-item-name{
+    font-size: 20px;
+    }
+    .lot-left-part-container {
+    flex: 1 1 0;
+    min-width: 150px;
+    padding: 10px;
+    }
+    .lot-item {
+    height: 150px;
+    }
     }
     @@media(max-width: 400px){
-        .lot-left-part-container {
-            min-width: 100px;
-        }
-        .lot-left-part-container {
-            padding: 5px;
-        }
+    .lot-left-part-container {
+    min-width: 100px;
+    }
+    .lot-left-part-container {
+    padding: 5px;
+    }
     }
 </style>
-
+@if (TempData["ErrorMessage"] != null)
+{
+    <script>
+        alert('@Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(TempData["ErrorMessage"]!.ToString()))');
+    </script>
+}
 <script>
     $(() => {
         setInterval(function () {
             $(".lot-item:not(.expired)").each(function () {
-                console.log($(this));
                 const time = $(this).find('.lot-item-time_left');
                 let expires = new Date($(this).data("expire_at"));
                 let now = new Date();

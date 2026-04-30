@@ -1,20 +1,234 @@
-﻿@model Program.ViewModels.LotViewModel
+﻿@using System.Security.Claims
+@using Application.Logic.User
+@model Program.ViewModels.LotViewModel
+@inject MediatR.IMediator mdtr
 @{
     ViewBag.Title = "Lot";
 }
 <div class="container">
-    <div>
-        <img src="@Model.Poster"/>
+    <div class="lot-poster">
+        <img src="@Model.Poster">
     </div>
-    <div>
-        <h1>@Model.ItemName</h1>
-        <h1>@Model.ItemType</h1>
-        <h1>@Model.BuyoutPrice</h1>
-        <h1>@Model.MinBetCurrency.Amount</h1>
-        <h1>@Model.LastBetAmount</h1>
-        <h1>@Model.LastBetUserName</h1>
-        <h1>@Model.MinBetCurrency.Type</h1>
-        <h1>@Model.Description</h1>
-        <h1>@Model.OwnerName</h1>
+    <div class="lot-details-container">
+        <span class="lot-detail lot-item-name">@Model.ItemName</span>
+        <span class="lot-detail lot-item-name-type">@Model.ItemType</span>
+        <span class="lot-detail lot-expires-at">. . .</span>
+        <span class="lot-detail lot-item-owner">@Model.OwnerName</span>
+        <span class="lot-detail lot-item-desc">@Model.Description</span>
+        <div class="lot-item-min-bet">
+            <span class="lot-detail">@Model.MinBetCurrency.Amount</span>
+            <span class="lot-detail">@Model.MinBetCurrency.Type</span>
+        </div>
+        @if(Model.BuyoutPrice is not null){
+            <div class="lot-buyout-container">
+                <span class="lot-detail lot-buyout-price">@Model.BuyoutPrice.Amount</span>
+                <span class="lot-detail">@Model.BuyoutPrice.Type</span>
+                <button id="buyout__btn">
+                    Buy immediately
+                    <a asp-action="confirm" asp-controller="home"
+                    asp-route-to="@Context.Request.Path/buyout"
+                    asp-route-message="Do you confirm buyout @Model.ItemName worth @Model.BuyoutPrice.Amount @(Model.BuyoutPrice.Type)?"></a>
+                </button>
+            </div>
+        }
+        @if(Model.LastBetAmount is not null && Model.LastBetUserName is not null){
+            <div class="last-bet-container">
+                <span class="lot-detail lot-item-last-bet-participant">@Model.LastBetUserName</span>
+                <span>placed a bet</span>
+                <span class="lot-detail lot-item-last-bet-amount">@Model.LastBetAmount.Amount</span>
+                <span class="lot-detail">@Model.LastBetAmount.Type</span>
+            </div>
+        }
+        @{
+            if (Guid.TryParse(Context.User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid userId))
+            {
+                var userResult = await mdtr.Send(new GetUserByIdQuery(userId));
+                var user = userResult.Data;
+                if(userResult.Success && user is not null){
+                    var currency = user.Currencies.FirstOrDefault(x=>x.Type == Model.MinBetCurrency.Type);
+                    var minBet = (Model.LastBetAmount?.Amount ?? 0) + Model.MinBetCurrency.Amount;
+                    if (currency is not null && currency.Amount >= minBet)
+                    {
+                        <div class="bet-container">
+                            <button id="bet__btn">
+                                Place a bet
+                            </button>
+                            <input id="bet_amount" type="number" min="@minBet" max="@currency.Amount"/>
+                        </div>
+                    }
+                    else
+                    {
+                        <span style="color: red; font-size: 16px; margin: 5px 0; display: inline-block;">Not enough money</span>
+                    }
+                }
+            }
+            else
+            {
+                <span style="color: red; font-size: 16px; margin: 5px 0; display: inline-block;">Log in your account to make bet</span>
+            }
+        }
     </div>
 </div>
+
+<style>
+    #bet_amount{
+
+    }
+    .bet-container{
+        display: flex;
+        justify-content: space-between;
+    }
+    #bet__btn {
+        padding: 5px;
+        font-size: 24px;
+        margin: 5px 3px;
+    }
+    #buyout__btn {
+        padding: 3px;
+        margin-left: auto;
+        font-size: 20px;
+        margin: 3px 1px;
+        position:relative;
+    }
+    .lot-item-last-bet-amount{
+        color: green;
+    }
+    .lot-item-last-bet-participant{
+        color: blue;
+    }
+    .lot-buyout-container,
+    .last-bet-container {
+        flex-wrap: wrap;
+        border: 1px solid black;
+        border-radius: 7px;
+        gap: 5px;
+        align-items: first baseline;
+        display: flex;
+        padding: 1px 3px;
+    }
+    .lot-buyout-container {
+        margin: 5px 0;
+    }
+    .container {
+        display: flex;
+        flex-direction: row-reverse;
+        height: max-content;
+    }
+    .lot-item-min-bet {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+    }
+    .lot-item-min-bet .lot-detail:first-child {
+        color: green;
+    }
+    .lot-item-min-bet::before {
+        content: "Min Bet: ";
+        font-size: 24px;
+    }
+    .lot-buyout-price{
+        color: green;
+    }
+    .lot-buyout-container:before{
+        content: "Buyout Price: ";
+        font-size: 24px;
+    }
+    .lot-details-container {
+        flex: 2 1 0;
+        min-width: 0;
+    }
+    .lot-poster {
+        display: flex;
+        flex: 3 1 0;
+        align-items: flex-start;
+        justify-content: center;
+    }
+    .lot-poster img {
+        object-fit: contain;
+        margin: 50px 10px;
+        overflow: auto;
+        max-width: 100%;
+        border: 1px solid greenyellow;
+    }
+    .lot-item-name-and-type {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid black;
+        border-radius: 7px;
+        width: max-content;
+        padding: 5px;
+    }
+    .lot-item-owner {
+        color: blue;
+        margin: 5px;
+        cursor: pointer;
+    }
+    .lot-detail {
+        font-size: 24px;
+        display: block;
+    }
+    .lot-item-name {
+        font-weight: bold;
+        overflow: hidden;
+        margin: 5px;
+    }
+    .lot-item-name-type {
+        color: gray;
+        border: 1px solid black;
+        border-radius: 7px;
+        width: fit-content;
+        padding: 3px 7px;
+    }
+    .lot-item-desc {
+        color: lightslategrey;
+    }
+
+    .lot-expires-at{
+        margin: 3px 0;
+    }
+    @@media(max-width: 600px){
+        .lot-detail{
+            font-size: 16px;
+        }
+        .lot-item-min-bet::before,
+        .lot-buyout-container:before,
+        #bet__btn 
+        {
+            font-size: 16px;
+        }
+        #buyout__btn{
+            font-size: 12px;
+        }
+    }
+    #buyout__btn.expired,
+    #bet__btn.expired{
+        display: none;
+    }
+    #buyout__btn a{
+        position: absolute;
+        top: 0;left: 0;right: 0; bottom: 0;
+    }
+</style>
+
+<script>
+    const expires = new Date('@Model.ExpiresAt.ToString("o")');
+    $(function () {
+        const time_interval = setInterval(function () {
+            const time = $('.lot-expires-at');
+            let now = new Date();
+            let df = expires - now;
+            if (df <= 0) {
+                time.text(`expired`);
+                $('#buyout__btn').addClass('expired');
+                $('#bet__btn').addClass('expired');
+                clearInterval(time_interval);
+                return
+            }
+            const d = Math.floor(df / (1000 * 60 * 60 * 24));
+            const h = Math.floor((df / (1000 * 60 * 60)) % 24);
+            const m = Math.floor((df / 1000 / 60) % 60);
+            const s = Math.floor((df / 1000) % 60);
+            time.text(`${d}:${h}:${m}:${s}`);
+        }, 1000);
+    });
+</script>
