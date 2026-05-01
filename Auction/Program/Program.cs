@@ -66,14 +66,17 @@ namespace Auction
 public class DefaultDataHelper
 {
     private readonly AppDbContext _context;
-    public DefaultDataHelper(AppDbContext context)
+    private readonly LoginService _ls;
+    public DefaultDataHelper(AppDbContext context, LoginService ls)
     {
         _context = context;
+        _ls = ls;
     }
     public void AddDefaultData()
     {
         _context.Database.EnsureDeleted();
         _context.Database.EnsureCreated();
+        _context.Users.First(x => x.Id == _ls.TryRegisterAsync("1", "1", "1").Result.Data).Currencies.Add(new WalletCurrency(1000, CurrencyType.RUB));
         var user1 = new User("u1", DateTime.Now, "u1 n", "erg", new List<WalletCurrency>() { new WalletCurrency(1111, CurrencyType.RUB)});
         var user2 = new User("u2", DateTime.Now, "u2 n", "egr", new List<WalletCurrency>() { new WalletCurrency(10, CurrencyType.RUB) });
         var item1 = new Item("1", "Item 1", "Item 1 desc", ItemType.Usual, user2, "https://fb.ru/misc/i/gallery/10682/1225582.jpg");

@@ -65,18 +65,13 @@
 </div>
 
 <style>
-    .prohibition{
-        color: red;
-        font-size: 16px;
-        margin: 5px 0;
-        display: inline-block;
-    }
     #bet_amount{
 
     }
     .bet-container{
         display: flex;
         justify-content: space-between;
+        margin: 5px 0;
     }
     #bet__btn {
         padding: 5px;
@@ -200,8 +195,8 @@
             font-size: 12px;
         }
     }
-    #buyout__btn.expired,
-    #bet__btn.expired{
+    .lot-buyout-container.expired,
+    .bet-container.expired {
         display: none;
     }
     #buyout__btn a{
@@ -219,8 +214,8 @@
             let df = expires - now;
             if (df <= 0) {
                 time.text(`expired`);
-                $('#buyout__btn').addClass('expired');
-                $('#bet__btn').addClass('expired');
+                $('.lot-buyout-container').addClass('expired');
+                $('.bet-container').addClass('expired');
                 clearInterval(time_interval);
                 return
             }
@@ -230,5 +225,13 @@
             const s = Math.floor((df / 1000) % 60);
             time.text(`${d}:${h}:${m}:${s}`);
         }, 1000);
+        $('#bet__btn').click(function () {
+            const bet_amount = $('#bet_amount').val();
+            $.post('@Url.Action("bet", "lot", new {Id = Model.Id})', { amount: bet_amount }, function (response) {
+                window.location.href = "";
+            }).fail(function () {
+                window.location.href = "";
+            });
+        });
     });
 </script>

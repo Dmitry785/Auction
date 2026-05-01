@@ -2,4 +2,10 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 <link rel="stylesheet" href="~/css/main.css" asp-append-version="true" />
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script src="~/js/jquery-4.0.0.min.js"></script>
+@if (TempData["ErrorMessage"] != null)
+{
+    <script>
+        alert('@Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(TempData["ErrorMessage"]!.ToString()))');
+    </script>
+}

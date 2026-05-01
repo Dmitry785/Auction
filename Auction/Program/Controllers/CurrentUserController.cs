@@ -30,7 +30,7 @@ namespace Program.Controllers
                 return RedirectToAction("logout", "login");
             var user = userResult.Data!;
             ViewBag.SelectedPageName = "Account";
-            return View(new UserViewModel(user.Username, user.Name, user.RegisterDate));
+            return View(new CurrentUserViewModel(user.Username, user.Name, user.RegisterDate, user.Currencies));
         }
         [Authorize(Policy = "LinkedToTheOriginalAccount")]
         [HttpGet]
@@ -89,7 +89,7 @@ namespace Program.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 claimsPrincipal,
                 authProperties);
-            return RedirectToAction("Index", "User");
+            return RedirectToAction("Index", "currentUser");
         }
     }
 }

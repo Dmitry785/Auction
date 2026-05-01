@@ -1,4 +1,4 @@
-﻿@model Program.ViewModels.UserViewModel
+﻿@model Program.ViewModels.CurrentUserViewModel
 @{
     ViewBag.Title = "Account";
 }
@@ -16,6 +16,24 @@
             Register Date<br />
             <span>@Model.RegisterDate.ToString()</span>
         </h1>
+    </div>
+    <div class="profile-wallets">
+        @{
+            if(Model.Currencies.Count == 0)
+            {
+                <span class="prohibition">Cant buyout</span>
+            }
+            else
+            {
+                foreach(var currency in Model.Currencies)
+                {
+                    <div class="profile-wallets-item">
+                        <h1>@currency.Type.ToString()</h1>
+                        <span>@currency.Amount.ToString()</span>
+                    </div>
+                }
+            }
+        }
     </div>
     <div class="profile-control">
         @if (Context.User.FindFirst("linked_account_id") is not null)
@@ -35,11 +53,30 @@
             Logout
             <a asp-action="Logout" asp-controller="Login"></a>
         </div>
-        <vc:></vc:>
     </div>
 </div>
 
 <style>
+    .profile-wallets-item span {
+        text-align: center;
+        font-size: 16px;
+        color: green;
+    }
+    .profile-wallets-item h1{
+        text-align: center;
+        font-size: 18px;
+    }
+    .profile-wallets-item{
+        display: flex;
+        flex-direction: column;
+        width: 100px;
+        border: 1px solid darkgreen;
+        border-radius: 3px;
+    }
+    .profile-wallets{
+        display: flex;
+        overflow: auto;
+    }
     .profile-container{
         display: flex;
         flex-direction: row-reverse;

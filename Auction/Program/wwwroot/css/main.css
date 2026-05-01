@@ -15,3 +15,9 @@ main-content{
     margin: 10px 0;
     min-height: 60vh;
 }
+.prohibition {
+    color: red;
+    font-size: 16px;
+    margin: 5px 0;
+    display: inline-block;
+}

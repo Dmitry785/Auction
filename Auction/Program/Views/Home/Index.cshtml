@@ -128,12 +128,6 @@
     }
     }
 </style>
-@if (TempData["ErrorMessage"] != null)
-{
-    <script>
-        alert('@Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(TempData["ErrorMessage"]!.ToString()))');
-    </script>
-}
 <script>
     $(() => {
         setInterval(function () {
