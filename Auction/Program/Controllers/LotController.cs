@@ -27,7 +27,12 @@ namespace Program.Controllers
             var lot = (await mdtr.Send(new GetLotByIdQuery(id))).Data;
             if (lot is null)
                 return RedirectToAction("Index", "Home");
+            if (paymentService.CheckLotCompleted(id))
+            {
+                return RedirectToAction("Index", "Home");
+            }
             var userId = HttpContext.User.GetUserId();
+            var hasUserLinkedAccount = HttpContext.User.GetLinkedAccountId() != null;
             await Console.Out.WriteLineAsync(userId.ToString());
             bool isAuthorized = false;
             bool canUserBuyout = false;
@@ -37,7 +42,7 @@ namespace Program.Controllers
             if (userId != Guid.Empty) {
                 isAuthorized = true;
                 var user = (await mdtr.Send(new GetUserByIdQuery(userId))).Data;
-                if (user is not null)
+                if (user is not null && hasUserLinkedAccount)
                 {
                     betCurrency = user.Currencies.FirstOrDefault(x => x.Type == lot.MinBetCurrency.Type);
                     minBet = (lot.CurrentBet?.BetAmount.Amount ?? 0) + lot.MinBetCurrency.Amount;
@@ -56,28 +61,25 @@ namespace Program.Controllers
                 }
             }
             return View(new LotViewModel(lot.Id, lot.ItemInfo.Name, lot.ItemInfo.Description,
-                lot.ItemInfo.Poster, lot.ItemInfo.Type, lot.ItemInfo.Owner.Name, lot.BuyoutPrice, lot.MinBetCurrency,
+                lot.ItemInfo.Poster, lot.ItemInfo.Type, lot.LotOwner.Name, lot.BuyoutPrice, lot.MinBetCurrency,
                 lot.CurrentBet?.BetAmount, lot.CurrentBet?.BetParticipant.Name, lot.StartTime + lot.Duration,
-                isAuthorized, canUserBet, canUserBuyout, minBet, betCurrency?.Amount));
+                isAuthorized, hasUserLinkedAccount, canUserBet, canUserBuyout, minBet, betCurrency?.Amount));
         }
         [Route("buyout")]
         [Authorize(Policy = "LinkedToTheOriginalAccount")]
-        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult> Buyout([FromRoute] Guid id)
         {
-            var lot = (await mdtr.Send(new GetLotByIdQuery(id))).Data;
-            if (lot is null || lot.BuyoutPrice is null)
-                return RedirectToAction("Index", "Home");
             var userId = HttpContext.User.GetUserId();
             if (userId == Guid.Empty)
                 return RedirectToAction("Index", "Login");
-            var paymentResult = await paymentService.WithdrawMoney(userId, lot.BuyoutPrice);
+            var paymentResult = await paymentService.BuyoutLot(userId, id);
             if (paymentResult.Failed)
             {
                 TempData["ErrorMessage"] = paymentResult.ErrorMessage;
                 return RedirectToAction("Index", "Home");
             }
-            return RedirectToAction("Items", "User");
+            return RedirectToAction("Items", "CurrentUser");
         }
         [Route("bet")]
         [Authorize(Policy = "LinkedToTheOriginalAccount")]
@@ -88,14 +90,11 @@ namespace Program.Controllers
             var userId = HttpContext.User.GetUserId();
             if (userId == Guid.Empty)
                 return BadRequest();
-            Console.WriteLine("1");
             if (!decimal.TryParse(amountString, out var amount))
                 return BadRequest();
-            Console.WriteLine("2");
             var paymentResult = await paymentService.PlaceBet(userId, id, amount);
             if (paymentResult.Failed)
             {
-                Console.WriteLine("3");
                 TempData["ErrorMessage"] = paymentResult.ErrorMessage;
                 return BadRequest();
             }

@@ -25,7 +25,7 @@
                     <button id="buyout__btn">
                         Buy immediately
                         <a asp-action="confirm" asp-controller="home"
-                        asp-route-to="@Context.Request.Path/buyout"
+                        asp-route-to="@Url.Action("buyout","lot", new {Id=Model.Id})"
                         asp-route-message="Do you confirm buyout @Model.ItemName worth @Model.BuyoutPrice.Amount @(Model.BuyoutPrice.Type)?"></a>
                     </button>
                 }
@@ -44,18 +44,24 @@
             </div>
         }
         @if(Model.IsUserAuthorized){
-            if (Model.CanUserBet)
-            {
-                <div class="bet-container">
-                    <button id="bet__btn">
-                        Place a bet
-                    </button>
-                    <input id="bet_amount" type="number" min="@Model.MinBet" max="@Model.MaxBet"/>
-                </div>
+            if(Model.HasUserLinkedAccount){
+                if (Model.CanUserBet)
+                {
+                    <div class="bet-container">
+                        <button id="bet__btn">
+                            Place a bet
+                        </button>
+                        <input id="bet_amount" type="number" min="@Model.MinBet" max="@Model.MaxBet"/>
+                    </div>
+                }
+                else
+                {
+                    <span class="prohibition">Not enough money</span>
+                }
             }
             else
             {
-            <span class="prohibition">Not enough money</span>
+                <span class="prohibition">Link your original account first</span>
             }
         }
         else{
@@ -108,6 +114,8 @@
         display: flex;
         flex-direction: row-reverse;
         height: max-content;
+        gap: 20px;
+        margin: 20px 10px;
     }
     .lot-item-min-bet {
         display: flex;
@@ -140,7 +148,6 @@
     }
     .lot-poster img {
         object-fit: contain;
-        margin: 50px 10px;
         overflow: auto;
         max-width: 100%;
         border: 1px solid greenyellow;
