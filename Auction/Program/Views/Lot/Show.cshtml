@@ -240,5 +240,8 @@
                 window.location.href = "";
             });
         });
+        $('.lot-item-name').click(function (){
+            window.location.href = '@Url.Action("Show", "Item", new {Id = Model.ItemId})'
+        });
     });
 </script>

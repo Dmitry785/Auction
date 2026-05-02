@@ -2,4 +2,37 @@
 @{
     ViewBag.Title = "User";
 }
-<h1>Item @Model.Item.ItemName</h1>
+<div class="container">
+    <div class="item-poster-cont">
+        <img src="@Model.Item.Poster">
+    </div>
+    <div class="item-desc-cont">
+        <span>@Model.Item.ItemName</span>
+        <span>@Model.Item.ItemType</span>
+        <span>@Model.Item.OwnerUsername</span>
+        <span>@Model.Item.ItemDescription</span>
+    </div>
+</div>
+
+<style>
+    .container{
+        display: flex;
+        gap: 20px;
+    }
+    .item-desc-cont{
+        flex: 1 1 0;
+        display: flex;
+        flex-direction: column;
+    }
+    .item-poster-cont {
+        flex: 1 1 0;
+        min-width: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .item-poster-cont img{
+        object-fit: contain;
+        margin: 20px;
+    }
+</style>

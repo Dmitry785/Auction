@@ -29,7 +29,10 @@ namespace Program.Controllers
                 return RedirectToAction("Index", "Home");
             if (paymentService.CheckLotCompleted(id))
             {
-                return RedirectToAction("Index", "Home");
+                return View(new LotViewModel(lot.Id, lot.ItemInfo.Id, lot.ItemInfo.Name, lot.ItemInfo.Description,
+                    lot.ItemInfo.Poster, lot.ItemInfo.Type, lot.LotOwner.Name, lot.BuyoutPrice, lot.MinBetCurrency,
+                    lot.CurrentBet?.BetAmount, lot.CurrentBet?.BetParticipant.Name, lot.StartTime + lot.Duration,
+                    false, false, false, false, 0, 0));
             }
             var userId = HttpContext.User.GetUserId();
             var hasUserLinkedAccount = HttpContext.User.GetLinkedAccountId() != null;
@@ -60,7 +63,7 @@ namespace Program.Controllers
                     }
                 }
             }
-            return View(new LotViewModel(lot.Id, lot.ItemInfo.Name, lot.ItemInfo.Description,
+            return View(new LotViewModel(lot.Id, lot.ItemInfo.Id, lot.ItemInfo.Name, lot.ItemInfo.Description,
                 lot.ItemInfo.Poster, lot.ItemInfo.Type, lot.LotOwner.Name, lot.BuyoutPrice, lot.MinBetCurrency,
                 lot.CurrentBet?.BetAmount, lot.CurrentBet?.BetParticipant.Name, lot.StartTime + lot.Duration,
                 isAuthorized, hasUserLinkedAccount, canUserBet, canUserBuyout, minBet, betCurrency?.Amount));

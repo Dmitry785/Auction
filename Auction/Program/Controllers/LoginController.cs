@@ -11,6 +11,7 @@ using Domain.Models;
 using Application.Services;
 using Program.ViewModels;
 using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Program.Controllers
 {
@@ -30,6 +31,7 @@ namespace Program.Controllers
             return View(new LoginRequest(string.Empty, string.Empty));
         }
         [HttpPost]
+        [EnableRateLimiting("auth")]
         public async Task<IActionResult> Login([FromQuery]string? returnUrl, [FromForm]LoginRequest loginRequest)
         {
             if (!ModelState.IsValid)
@@ -70,6 +72,7 @@ namespace Program.Controllers
             return View(new RegisterRequest(string.Empty, string.Empty, string.Empty));
         }
         [HttpPost]
+        [EnableRateLimiting("auth")]
         public async Task<IActionResult> Register([FromQuery] string? returnUrl, [FromForm] RegisterRequest registerRequest)
         {
             if (!ModelState.IsValid)
