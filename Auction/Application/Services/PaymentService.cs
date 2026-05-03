@@ -69,7 +69,8 @@ namespace Application.Services
         }
         public async Task<Result> WithdrawMoney(Guid userId, Money money)
         {
-            var user = await context.Users.FirstOrDefaultAsync(x => x.Id == userId);
+            var user = await context.Users
+                .Include(x=>x.Currencies).FirstOrDefaultAsync(x => x.Id == userId);
             if (user is null)
                 return Result.Fail("Couldnt find the user");
             var withdrawOperation =

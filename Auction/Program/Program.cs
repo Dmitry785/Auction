@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.DependencyInjection;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
+
 namespace Auction
 {
     public class Program
@@ -31,6 +32,7 @@ namespace Auction
             builder.Services.AddTransient<LoginService>();
             builder.Services.AddTransient<DefaultDataHelper>();
             builder.Services.AddTransient<PaymentService>();
+            builder.Services.AddScoped<CmdService>();
             builder.Services.AddSingleton<BanService>();
             builder.Services.AddTransient(p=>new DataServerApiService("address"));
 
@@ -74,6 +76,8 @@ namespace Auction
                     p.RequireClaim("linked_account_id");
                 });
             });
+
+            builder.Services.AddHostedService<CmdListenerService>();
 
             var app = builder.Build();
 
@@ -157,9 +161,6 @@ public class DefaultDataHelper
         _context.Items.Add(item3);
         _context.Lots.Add(lot1);
         _context.Lots.Add(lot2);
-        /*for(int i=0;i<1000;i++)
-            _context.Lots.Add(new Lot(item2, DateTime.Now, TimeSpan.FromSeconds(30),
-                new Money(100, CurrencyType.RUB), item2.Owner));*/
         _context.SaveChanges();
     }
 }
@@ -173,5 +174,101 @@ public static class ClaimsPrincipalExtensions
     public static string? GetLinkedAccountId(this ClaimsPrincipal principal)
     {
         return principal.FindFirstValue("linked_account_id");
+    }
+}
+public class CmdService(PaymentService _paymentService, IMediator _mdtr,
+    ILogger<CmdService> _logger)
+{
+
+   public async Task ExecuteAsync(string input)
+    {
+        await HandleCommand(input);
+    }
+    private async Task HandleCommand(string? input)
+    {
+        if (string.IsNullOrEmpty(input))
+            return;
+        var inputStringSplit = input.Split();
+        string command = inputStringSplit[0];
+        string[] parameters = new string[0];
+        if (command.Length > 1)
+            parameters = new string[command.Length - 1];
+        Array.Copy(inputStringSplit, 1, parameters, 0, inputStringSplit.Length - 1);
+        try
+        {
+            switch (command)
+            {
+                case "deposit":
+                    var username = parameters[0];
+                    var moneyAmount = decimal.Parse(parameters[1]);
+                    var moneyType = GetCurrencyType(parameters[2]);
+                    var result = await _paymentService.DepositMoney(await GetUserIdByUsername(username),
+                        new Money(moneyAmount, moneyType));
+                    if (result.Failed)
+                    {
+                        _logger.LogWarning($"Command \"{command}\" >> {result.ErrorMessage}");
+                        return;
+                    }
+                    break;
+                case "withdraw":
+                    username = parameters[0];
+                    moneyAmount = decimal.Parse(parameters[1]);
+                    moneyType = GetCurrencyType(parameters[2]);
+                    result = await _paymentService.WithdrawMoney(await GetUserIdByUsername(username),
+                        new Money(moneyAmount, moneyType));
+                    if (result.Failed)
+                    {
+                        _logger.LogWarning($"Command \"{command}\" >> {result.ErrorMessage}");
+                        return;
+                    }
+                    break;
+                default:
+                    _logger.LogWarning($"Command \"{command}\" not found");
+                    return;
+            }
+            _logger.LogWarning($"Successful execution command \"{command}\"");
+        }
+        catch
+        {
+            _logger.LogWarning($"Failed to execute command \"{input}\"");
+        }
+    }
+    private async Task<Guid> GetUserIdByUsername(string username)
+    {
+        return (await _mdtr.Send(new GetAllUsersQuery(x => x.Username == username))).First().Id;
+    }
+    private CurrencyType GetCurrencyType(string type)
+    {
+        switch (type)
+        {
+            case "rub":
+                return CurrencyType.RUB;
+            case "usd":
+                return CurrencyType.USD;
+            case "btc":
+                return CurrencyType.BTC;
+            case "eth":
+                return CurrencyType.ETH;
+        }
+        throw new Exception("parse exception");
+    }
+}
+public class CmdListenerService(IServiceProvider _serviceProvider,
+    ILogger<CmdListenerService> _logger) : BackgroundService
+{
+
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Cmd Service has started");
+        await Task.Run(async () =>
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var input = await Task.Run(() => Console.ReadLine(), cancellationToken);
+                if (string.IsNullOrEmpty(input)) continue;
+                var scope = _serviceProvider.CreateScope();
+                await scope.ServiceProvider.GetRequiredService<CmdService>().ExecuteAsync(input);
+            }
+        }, cancellationToken);
     }
 }
