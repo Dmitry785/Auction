@@ -1,12 +1,65 @@
-﻿@model Program.ViewModels.ItemsViewModel
+﻿@model Program.ViewModels.CurrentUserItemsViewModel
 @{
     ViewBag.Title = "Items";
 }
-@{
-    foreach(var item in Model.Items)
+<ol class="user-items-cont">
+    @foreach(var item in Model.Items)
     {
-        <div>
-            @item.ItemName
-        </div>
+        <li class="user-item">
+            <img src="@item.Poster" />
+            <div class="item-desc">
+                <span class="item-name">
+                    @item.ItemName
+                </span>
+                <span class="item-type">
+                    @item.ItemType
+                </span>
+            </div>
+            <a asp-action="show" asp-controller="item" asp-route-id="@item.ItemId"></a>
+        </li>
     }
-}
+</ol>
+<style>
+    .user-items-cont{
+        display: flex;
+        gap: 20px;
+    }
+    .item-desc{
+        position:absolute;
+        left: 0; right: 0; bottom: 0;
+        background: rgba(255, 255, 255, 0.5);
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        padding: 5px;
+    }
+    .item-name{
+        font-size: 20px;
+        font-weight: bold;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+    .item-type {
+        font-size: 16px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+    .user-item{
+        background: gray;
+        border: 2px solid goldenrod;
+        width: min-content;
+        min-width: 200px;
+        min-height: 100px;
+        position: relative;
+        display: flex;
+        gap: 100px;
+        align-items: flex-start;
+    }
+    .user-item a{
+        position: absolute;
+        top: 0;bottom: 0;left: 0; right: 0;
+    }
+</style>

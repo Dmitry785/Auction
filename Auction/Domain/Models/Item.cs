@@ -12,7 +12,6 @@ namespace Domain.Models
         public string Description { get; set; } = null!;
         public string? Poster { get; set; }
         public ItemType Type { get; set; }
-        public Guid OwnerId { get; set; }
         public User Owner { get; set; } = null!;
         public Item(string originalId, string name, string description, ItemType type, User owner, string? poster = null) 
         {

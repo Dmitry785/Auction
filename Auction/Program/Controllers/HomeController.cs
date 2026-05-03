@@ -17,7 +17,7 @@ namespace Auction.Controllers
         {
             ViewBag.SelectedPageName = "Home";
             var lots = (await mdtr.Send(new GetAllLotsQuery()))
-                .Select(x => new LotDto(x.StartTime + x.Duration, x.Id, x.ItemInfo.Name,
+                .Select(x => new LotDto(x.StartTime + x.Duration, x.Id, x.LotOwner.Id, x.ItemInfo.Name,
                 x.ItemInfo.Owner.Username, x.ItemInfo.Description, x.ItemInfo.Poster)).ToList();
             return View(new HomeViewModel(lots));
         }

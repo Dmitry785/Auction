@@ -15,7 +15,13 @@ public sealed record GetAllLotsQueryHandler(IAppDbContext context) : IRequestHan
 {
     public async Task<List<Domain.Models.Lot>> Handle(GetAllLotsQuery request, CancellationToken cancellationToken)
     {
-        var lots = await context.Lots.Include(x=>x.ItemInfo).ThenInclude(x=>x.Owner).AsNoTracking().ToListAsync();
+        var lots = await context.Lots
+            .Include(x=>x.ItemInfo)
+                .ThenInclude(x=>x.Owner)
+            .Include(x => x.LotOwner)
+            .Include(x => x.CurrentBet)
+                .ThenInclude(x=>x.BetParticipant)
+            .AsNoTracking().ToListAsync();
         if (request.predicate is not null)
             lots = lots.Where(request.predicate!).ToList();
         return lots;

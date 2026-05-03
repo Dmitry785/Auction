@@ -2,4 +2,4 @@
 
 namespace Program.ViewModels;
 
-public sealed record ItemsViewModel(List<ItemDto> Items);
+public sealed record CurrentUserItemsViewModel(List<CurrentUserItemDto> Items);

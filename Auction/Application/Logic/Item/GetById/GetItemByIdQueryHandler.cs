@@ -15,7 +15,8 @@ public sealed record GetItemByIdQueryHandler(IAppDbContext context) : IRequestHa
 {
     public async Task<Result<Domain.Models.Item>> Handle(GetItemByIdQuery request, CancellationToken cancellationToken)
     {
-        var item = await context.Items.Include(x=>x.Owner).FirstOrDefaultAsync(x => x.Id == request.Id);
+        var item = await context.Items.Include(x=>x.Owner)
+            .AsNoTracking().FirstOrDefaultAsync(x => x.Id == request.Id);
         if (item is null)
             return Result<Domain.Models.Item>.Fail();
         return Result.Ok(item);

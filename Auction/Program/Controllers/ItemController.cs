@@ -17,6 +17,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Program.Controllers
 {
+    [Route("[controller]")]
     public class ItemController(IMediator mdtr) : Controller
     {
         [Route("{id}")]

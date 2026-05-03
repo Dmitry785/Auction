@@ -17,7 +17,11 @@ public sealed record GetLotByIdQueryHandler(IAppDbContext context) : IRequestHan
     {
         var lot = await context.Lots
             .Include(x => x.ItemInfo)
-                .ThenInclude(x=>x.Owner)
+                .ThenInclude(x => x.Owner)
+            .Include(x => x.LotOwner)
+            .Include(x => x.CurrentBet)
+                .ThenInclude(x => x.BetParticipant)
+            .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == request.Id);
         if (lot is null)
             return Result<Domain.Models.Lot>.Fail();

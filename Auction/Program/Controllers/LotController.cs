@@ -29,10 +29,13 @@ namespace Program.Controllers
                 return RedirectToAction("Index", "Home");
             if (paymentService.CheckLotCompleted(id))
             {
-                return View(new LotViewModel(lot.Id, lot.ItemInfo.Id, lot.ItemInfo.Name, lot.ItemInfo.Description,
+                lot = (await mdtr.Send(new GetLotByIdQuery(id))).Data;
+                if (lot is null)
+                    return RedirectToAction("Index", "Home");
+                return View(new LotViewModel(lot.Id, lot.ItemInfo.Id, lot.LotOwner.Id, lot.ItemInfo.Name, lot.ItemInfo.Description,
                     lot.ItemInfo.Poster, lot.ItemInfo.Type, lot.LotOwner.Name, lot.BuyoutPrice, lot.MinBetCurrency,
-                    lot.CurrentBet?.BetAmount, lot.CurrentBet?.BetParticipant.Name, lot.StartTime + lot.Duration,
-                    false, false, false, false, 0, 0));
+                    lot.CurrentBet?.BetAmount, lot.CurrentBet?.BetParticipant.Username, lot.StartTime + lot.Duration,
+                    false, false, false, false, null, null, true));
             }
             var userId = HttpContext.User.GetUserId();
             var hasUserLinkedAccount = HttpContext.User.GetLinkedAccountId() != null;
@@ -63,10 +66,10 @@ namespace Program.Controllers
                     }
                 }
             }
-            return View(new LotViewModel(lot.Id, lot.ItemInfo.Id, lot.ItemInfo.Name, lot.ItemInfo.Description,
+            return View(new LotViewModel(lot.Id, lot.ItemInfo.Id, lot.LotOwner.Id, lot.ItemInfo.Name, lot.ItemInfo.Description,
                 lot.ItemInfo.Poster, lot.ItemInfo.Type, lot.LotOwner.Name, lot.BuyoutPrice, lot.MinBetCurrency,
-                lot.CurrentBet?.BetAmount, lot.CurrentBet?.BetParticipant.Name, lot.StartTime + lot.Duration,
-                isAuthorized, hasUserLinkedAccount, canUserBet, canUserBuyout, minBet, betCurrency?.Amount));
+                lot.CurrentBet?.BetAmount, lot.CurrentBet?.BetParticipant.Username, lot.StartTime + lot.Duration,
+                isAuthorized, hasUserLinkedAccount, canUserBet, canUserBuyout, minBet, betCurrency?.Amount, false));
         }
         [Route("buyout")]
         [Authorize(Policy = "LinkedToTheOriginalAccount")]
@@ -89,7 +92,6 @@ namespace Program.Controllers
         [HttpPost]
         public async Task<IActionResult> Bet([FromRoute] Guid id, [FromForm(Name = "amount")]string amountString)
         {
-            Console.WriteLine(amountString);
             var userId = HttpContext.User.GetUserId();
             if (userId == Guid.Empty)
                 return BadRequest();

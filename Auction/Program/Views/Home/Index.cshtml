@@ -6,7 +6,7 @@
     @{
         foreach (var lot in @Model.Lots)
         {
-            <div data-id="@lot.Id" class="lot-item" data-expire_at="@lot.ExpiresAt.ToString("o")">
+            <div data-id="@lot.Id" data-owner-id="@lot.OwnerId" class="lot-item" data-expire_at="@lot.ExpiresAt.ToString("o")">
                 <div class="lot-left-part-container">
                     <img class="lot-item-poster" src="@lot.Poster" alt="item image"/>
                 </div>
@@ -151,6 +151,10 @@
         $('.lot-item-name').click(function () {
             const id = $(this).closest('div[data-id]').data("id");
             window.location.href = `/lot/${id}`;
+        });
+        $('.lot-item-owner').click(function () {
+            const id = $(this).closest('div[data-id]').data("owner-id");
+            window.location.href = `/user/${id}`;
         });
     });
 </script>

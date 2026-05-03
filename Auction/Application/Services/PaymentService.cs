@@ -81,7 +81,9 @@ namespace Application.Services
         }
         public async Task<Result> DepositMoney(Guid userId, Money money)
         {
-            var user = await context.Users.FirstOrDefaultAsync(x => x.Id == userId);
+            var user = await context.Users
+                .Include(x=>x.Currencies)
+                .FirstOrDefaultAsync(x => x.Id == userId);
             if (user is null)
                 return Result.Fail("Couldnt find the user");
             DepositMoney(user, money);
@@ -91,10 +93,11 @@ namespace Application.Services
         public bool CheckLotCompleted(Guid lotId)
         {
             var lot = context.Lots
-               .Include(x => x.ItemInfo)
-               .Include(x=>x.CurrentBet)
+            .Include(x => x.ItemInfo)
+            .Include(x=>x.LotOwner)
+            .Include(x=>x.CurrentBet)
                 .ThenInclude(x=>x.BetParticipant)
-               .FirstOrDefault(x => x.Id == lotId);
+            .FirstOrDefault(x => x.Id == lotId);
             if (lot is null)
                 return true;
             return CheckLotCompleted(lot);
@@ -108,8 +111,8 @@ namespace Application.Services
                 lot.Completed = true;
                 if (lot.CurrentBet is not null)
                 {
-                    DepositMoney(lot.ItemInfo.Owner, lot.CurrentBet.BetAmount);
-                    lot.ItemInfo.OwnerId = lot.CurrentBet.BetParticipant.Id;
+                    DepositMoney(lot.LotOwner, lot.CurrentBet.BetAmount);
+                    lot.ItemInfo.Owner = lot.CurrentBet.BetParticipant;
                 }
                 context.SaveChanges();
                 return true;

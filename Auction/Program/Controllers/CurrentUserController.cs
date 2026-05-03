@@ -44,14 +44,10 @@ namespace Program.Controllers
                 return RedirectToAction("logout", "login");
             var user = userResult.Data!;
             ViewBag.SelectedPageName = "Account";
-            var items = (await mdtr.Send(new GetAllItemsQuery(x => x.Owner == user)))
-                .Select(x=> {
-                    var lot = (mdtr.Send(new GetAllLotsQuery(l => l.ItemInfo.Id == x.Id)).Result).FirstOrDefault();
-                    return new ItemDto(x.Name, x.Description, lot is null ? null : Url.Action("Show", "Lot", new { id = lot.Id }),
-                        x.Poster, x.Owner.Username, x.Type.ToString());
-                    }
-                );
-            return View(new ItemsViewModel(items.ToList()));
+            var items = (await mdtr.Send(new GetAllItemsQuery(x => x.Owner.Id == user.Id)))
+                .Select(x=> new CurrentUserItemDto(x.Name, x.Poster, x.Type.ToString(), x.Id)
+                ).ToList();
+            return View(new CurrentUserItemsViewModel(items));
         }
         [Authorize]
         [HttpGet]

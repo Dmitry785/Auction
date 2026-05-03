@@ -1,6 +1,6 @@
 ﻿@model Program.ViewModels.LotViewModel
 @{
-    ViewBag.Title = "Lot";
+    ViewBag.Title = "Lot info";
 }
 <div class="container">
     <div class="lot-poster">
@@ -12,11 +12,14 @@
         <span class="lot-detail lot-expires-at">. . .</span>
         <span class="lot-detail lot-item-owner">@Model.OwnerName</span>
         <span class="lot-detail lot-item-desc">@Model.Description</span>
-        <div class="lot-item-min-bet">
-            <span class="lot-detail">@Model.MinBetCurrency.Amount</span>
-            <span class="lot-detail">@Model.MinBetCurrency.Type</span>
-        </div>
-        @if(Model.BuyoutPrice is not null){
+        @if (!Model.IsExpired)
+        {
+            <div class="lot-item-min-bet">
+                <span class="lot-detail">@Model.MinBetCurrency.Amount</span>
+                <span class="lot-detail">@Model.MinBetCurrency.Type</span>
+            </div>
+        }
+        @if(Model.BuyoutPrice is not null && !Model.IsExpired){
             <div class="lot-buyout-container">
                 <span class="lot-detail lot-buyout-price">@Model.BuyoutPrice.Amount</span>
                 <span class="lot-detail">@Model.BuyoutPrice.Type</span>
@@ -35,37 +38,47 @@
                 }
             </div>
         }
-        @if(Model.LastBetAmount is not null && Model.LastBetUserName is not null){
+        @if(Model.LastBetAmount is not null && Model.LastBetUsername is not null && !Model.IsExpired){
             <div class="last-bet-container">
-                <span class="lot-detail lot-item-last-bet-participant">@Model.LastBetUserName</span>
+                <span class="lot-detail lot-item-last-bet-participant">@Model.LastBetUsername</span>
                 <span>placed a bet</span>
                 <span class="lot-detail lot-item-last-bet-amount">@Model.LastBetAmount.Amount</span>
                 <span class="lot-detail">@Model.LastBetAmount.Type</span>
             </div>
         }
-        @if(Model.IsUserAuthorized){
-            if(Model.HasUserLinkedAccount){
-                if (Model.CanUserBet)
+        @if (Model.IsExpired)
+        {
+            <span class="prohibition">Cant bet (expired)</span>
+        }
+        else
+        {
+            if (Model.IsUserAuthorized)
+            {
+                if (Model.HasUserLinkedAccount)
                 {
-                    <div class="bet-container">
-                        <button id="bet__btn">
-                            Place a bet
-                        </button>
-                        <input id="bet_amount" type="number" min="@Model.MinBet" max="@Model.MaxBet"/>
-                    </div>
+                    if (Model.CanUserBet)
+                    {
+                        <div class="bet-container">
+                            <button id="bet__btn">
+                                Place a bet
+                            </button>
+                            <input id="bet_amount" type="number" min="@Model.MinBet" max="@Model.MaxBet"/>
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="prohibition">Cant bet (not enough money)</span>
+                    }
                 }
                 else
                 {
-                    <span class="prohibition">Not enough money</span>
+                    <span class="prohibition">Link your original account first</span>
                 }
             }
             else
             {
-                <span class="prohibition">Link your original account first</span>
+                <span class="prohibition">Log in your account to make bet</span>
             }
-        }
-        else{
-            <span class="prohibition">Log in your account to make bet</span>
         }
     </div>
 </div>
@@ -152,14 +165,6 @@
         max-width: 100%;
         border: 1px solid greenyellow;
     }
-    .lot-item-name-and-type {
-        display: flex;
-        flex-direction: column;
-        border: 1px solid black;
-        border-radius: 7px;
-        width: max-content;
-        padding: 5px;
-    }
     .lot-item-owner {
         color: blue;
         margin: 5px;
@@ -173,6 +178,7 @@
         font-weight: bold;
         overflow: hidden;
         margin: 5px;
+        cursor: pointer;
     }
     .lot-item-name-type {
         color: gray;
@@ -242,6 +248,9 @@
         });
         $('.lot-item-name').click(function (){
             window.location.href = '@Url.Action("Show", "Item", new {Id = Model.ItemId})'
+        });
+        $('.lot-item-owner').click(function (){
+            window.location.href = '@Url.Action("Show", "User", new { Id = Model.OwnerId })'
         });
     });
 </script>
