@@ -15,6 +15,7 @@ namespace Infrastructure
         public DbSet<Item> Items { get; set; }
         public DbSet<Lot> Lots { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<ArchivalLot> ArchivalLots { get; set; }
         public AppDbContext(DbContextOptions<AppDbContext> options)
             :base(options)
         {
@@ -25,6 +26,21 @@ namespace Infrastructure
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<User>().HasIndex(x => x.OriginalId).IsUnique();
             modelBuilder.Entity<User>().HasIndex(x => x.Username).IsUnique();
+            modelBuilder.Entity<Lot>().OwnsOne(l => l.CurrentBet, bet =>
+            {
+                bet.HasOne(b => b.BetParticipant)
+                   .WithMany()
+                   .OnDelete(DeleteBehavior.Restrict); 
+            });
+            modelBuilder.Entity<Lot>()
+                .HasOne(l => l.ItemInfo)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Lot>()
+                .HasOne(l => l.LotOwner)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

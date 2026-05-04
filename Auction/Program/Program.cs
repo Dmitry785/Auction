@@ -15,13 +15,8 @@ namespace Auction
 {
     public class Program
     {
-        private static bool USE_DEF_DATA = true;
         public static void Main(string[] args)
         {
-            if (args.Contains("--use-def-data"))
-            {
-                USE_DEF_DATA = true;
-            }
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllersWithViews();
@@ -31,7 +26,7 @@ namespace Auction
 
             builder.Services.AddTransient<LoginService>();
             builder.Services.AddTransient<DefaultDataHelper>();
-            builder.Services.AddTransient<PaymentService>();
+            builder.Services.AddTransient<LotsManagementAndPaymentService>();
             builder.Services.AddScoped<CmdService>();
             builder.Services.AddSingleton<BanService>();
             builder.Services.AddTransient(p=>new DataServerApiService("address"));
@@ -46,13 +41,12 @@ namespace Auction
             {
                 options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(
                     context => RateLimitPartition.GetSlidingWindowLimiter(
-                        //context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
                         context.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "unknown",
                         _ => new SlidingWindowRateLimiterOptions
                         {
-                            PermitLimit = 200,
-                            Window = TimeSpan.FromSeconds(10),
-                            SegmentsPerWindow = 2
+                            PermitLimit = 120,
+                            Window = TimeSpan.FromSeconds(60),
+                            SegmentsPerWindow = 6
                         }));
                 options.AddFixedWindowLimiter("auth", options =>
                 {
@@ -88,11 +82,11 @@ namespace Auction
             app.Use(async (c, next) =>
             {
                 Console.WriteLine($"{c.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "unknown"} >> {c.Request.Path}");
-                /*if (c.Request.Headers.ContainsKey("X-Forwarded-For"))
+                if (c.Request.Headers.ContainsKey("X-Forwarded-For"))
                 {
-                    Console.WriteLine($"{c.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "unknown"} !! using X-Forwarded-For header");
+                    await c.Response.WriteAsync("Please, do not use X-Forwarded-For header");
                     return;
-                }*/
+                }
                 await next.Invoke();
             });
 
@@ -105,10 +99,6 @@ namespace Auction
             app.UseRateLimiter();
 
             app.MapControllers();
-
-            if (USE_DEF_DATA) 
-                using (var scope = app.Services.CreateScope())
-                    scope.ServiceProvider.GetRequiredService<DefaultDataHelper>().AddDefaultData();
 
             app.Run();
         }
@@ -176,8 +166,8 @@ public static class ClaimsPrincipalExtensions
         return principal.FindFirstValue("linked_account_id");
     }
 }
-public class CmdService(PaymentService _paymentService, IMediator _mdtr,
-    ILogger<CmdService> _logger)
+public class CmdService(LotsManagementAndPaymentService _paymentService, IMediator _mdtr,
+    ILogger<CmdService> _logger, DefaultDataHelper _defaultDataHelper)
 {
 
    public async Task ExecuteAsync(string input)
@@ -221,6 +211,9 @@ public class CmdService(PaymentService _paymentService, IMediator _mdtr,
                         _logger.LogWarning($"Command \"{command}\" >> {result.ErrorMessage}");
                         return;
                     }
+                    break;
+                case "add":
+                    _defaultDataHelper.AddDefaultData();
                     break;
                 default:
                     _logger.LogWarning($"Command \"{command}\" not found");

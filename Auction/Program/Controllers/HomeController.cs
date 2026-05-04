@@ -1,4 +1,5 @@
-﻿using Application.Logic.Lot;
+﻿using Application.Logic.ArchiveLot;
+using Application.Logic.Lot;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -21,6 +22,13 @@ namespace Auction.Controllers
                 x.ItemInfo.Owner.Username, x.ItemInfo.Description, x.ItemInfo.Poster)).ToList();
             return View(new HomeViewModel(lots));
         }
+        /*[Route("/archival")]
+        [HttpGet]
+        public async Task<IActionResult> LoadArchivalLots()
+        {
+            return Json((await mdtr.Send(new GetAllArchivalLotsQuery()))
+                .Select(x => new ArchivalLotDto()));
+        }*/
         [ActionName("About")]
         [HttpGet]
         public IActionResult Index2()

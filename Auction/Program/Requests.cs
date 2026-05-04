@@ -11,4 +11,23 @@ namespace Program
         [Required] 
         string Password, 
         string Name);
+    public sealed record CreateLotRequest([Required] TimeOnly Duration, [Required]decimal MinBetAmount, [Required][CurrencyTypeValidation] string MinBetCurrencyType
+        , decimal? BuyoutAmount, [CurrencyTypeValidation]string? BuyoutCurrencyType);
+
+    public class CurrencyTypeValidationAttribute : ValidationAttribute
+    {
+        public override bool IsValid(object? valueObj)
+        {
+            if (valueObj is null)
+                return true;
+            if(valueObj is string value)
+            {
+                value = value.ToLower();
+                return value == "rub" || value == "usd" || value == "btc" || value == "eth";
+            }
+            return false;
+        }
+    }
+
 }
+

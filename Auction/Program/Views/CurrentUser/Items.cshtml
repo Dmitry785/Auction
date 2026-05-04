@@ -5,7 +5,7 @@
 <ol class="user-items-cont">
     @foreach(var item in Model.Items)
     {
-        <li class="user-item">
+        <li class="user-item" data-id="@item.ItemId">
             <img src="@item.Poster" />
             <div class="item-desc">
                 <span class="item-name">
@@ -14,6 +14,18 @@
                 <span class="item-type">
                     @item.ItemType
                 </span>
+                @if(item.LotId is not null)
+                {
+                    <div class="item-lot-view-link" data-id="@item.LotId">
+                        View lot
+                    </div>
+                }
+                else
+                {
+                    <div class="item-lot-create-link">
+                        Create lot
+                    </div>
+                }
             </div>
             <a asp-action="show" asp-controller="item" asp-route-id="@item.ItemId"></a>
         </li>
@@ -22,6 +34,7 @@
 <style>
     .user-items-cont{
         display: flex;
+        flex-direction: column;
         gap: 20px;
     }
     .item-desc{
@@ -58,8 +71,37 @@
         gap: 100px;
         align-items: flex-start;
     }
+
+        .user-item img {
+            max-width: 100%;
+        object-fit: contain;
+        overflow: hidden;
+    }
     .user-item a{
         position: absolute;
         top: 0;bottom: 0;left: 0; right: 0;
     }
+
+    .item-lot-view-link,
+    .item-lot-create-link{
+        z-index: 1;
+        display: inline-block;
+        border: 1px solid blue;
+        border-radius: 3px;
+        padding: 2px 6px;
+        background: rgba(255, 255, 255, 0.5);
+        align-self: flex-start;
+        cursor: zoom-in;
+    }
 </style>
+
+<script>
+    $(function (){
+        $('.item-lot-view-link').dblclick(function () {
+            window.location.href = `/lot/${$(this).data("id")}`;
+        });
+        $('.item-lot-create-link').click(function () {
+            window.location.href = `/item/${$(this).closest('li').data("id")}/createLot`;
+        });
+    })
+</script>

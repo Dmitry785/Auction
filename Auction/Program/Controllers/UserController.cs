@@ -21,6 +21,7 @@ namespace Program.Controllers
     public class UserController(IMediator mdtr) : Controller
     {
         [Route("{id:guid}")]
+        [HttpGet]
         public async Task<IActionResult> Show([FromRoute] Guid id)
         {
             Console.WriteLine(id.ToString());

@@ -9,18 +9,16 @@ using Domain.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Logic.Lot;
+namespace Application.Logic.ArchiveLot;
 
-public sealed record GetAllArchiveLotsQueryHandler(IAppDbContext context) : IRequestHandler<GetAllLotsQuery, List<Domain.Models.Lot>>
+public sealed record GetAllArchivalLotsQueryHandler(IAppDbContext context) : IRequestHandler<GetAllArchivalLotsQuery, List<ArchivalLot>>
 {
-    public async Task<List<Domain.Models.Lot>> Handle(GetAllLotsQuery request, CancellationToken cancellationToken)
+    public async Task<List<ArchivalLot>> Handle(GetAllArchivalLotsQuery request, CancellationToken cancellationToken)
     {
-        var lots = await context.Lots
+        var lots = await context.ArchivalLots
             .Include(x=>x.ItemInfo)
                 .ThenInclude(x=>x.Owner)
             .Include(x => x.LotOwner)
-            .Include(x => x.CurrentBet)
-                .ThenInclude(x=>x.BetParticipant)
             .AsNoTracking().ToListAsync();
         if (request.predicate is not null)
             lots = lots.Where(request.predicate!).ToList();

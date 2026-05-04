@@ -152,7 +152,7 @@
             const id = $(this).closest('div[data-id]').data("id");
             window.location.href = `/lot/${id}`;
         });
-        $('.lot-item-owner').click(function () {
+        $('.lot-item-owner').dblclick(function () {
             const id = $(this).closest('div[data-id]').data("owner-id");
             window.location.href = `/user/${id}`;
         });

@@ -15,7 +15,10 @@ using Application.Logic.Lot;
 namespace Program.Controllers
 {
     [Route("[controller]/[action]")]
-    public class CurrentUserController(IMediator mdtr, LoginService loginService, DataServerApiService apiService) : Controller
+    public class CurrentUserController(IMediator mdtr, 
+        LoginService loginService, 
+        DataServerApiService apiService,
+        LotsManagementAndPaymentService paymentService) : Controller
     {
         [Authorize]
         [HttpGet]
@@ -44,10 +47,17 @@ namespace Program.Controllers
                 return RedirectToAction("logout", "login");
             var user = userResult.Data!;
             ViewBag.SelectedPageName = "Account";
-            var items = (await mdtr.Send(new GetAllItemsQuery(x => x.Owner.Id == user.Id)))
-                .Select(x=> new CurrentUserItemDto(x.Name, x.Poster, x.Type.ToString(), x.Id)
-                ).ToList();
-            return View(new CurrentUserItemsViewModel(items));
+            var itemsTasks = (await mdtr.Send(new GetAllItemsQuery(x => x.Owner.Id == user.Id)))
+                .Select(async x=> {
+                    var lot = (await mdtr.Send(new GetAllLotsQuery(l => l.ItemInfo.Id == x.Id))).FirstOrDefault();
+                    if (lot is null || await paymentService.CheckLotCompleted(lot.Id))
+                        return new CurrentUserItemDto(x.Name, x.Poster, x.Type.ToString(),
+                            x.Id, null);
+                    return new CurrentUserItemDto(x.Name, x.Poster, x.Type.ToString(),
+                        x.Id, lot.Id);
+                });
+            return View(new CurrentUserItemsViewModel(
+                (await Task.WhenAll(itemsTasks)).ToList()));
         }
         [Authorize]
         [HttpGet]

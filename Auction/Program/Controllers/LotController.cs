@@ -18,7 +18,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace Program.Controllers
 {
     [Route("[controller]/{id:guid}")]
-    public class LotController(IMediator mdtr, PaymentService paymentService) : Controller
+    public class LotController(IMediator mdtr, LotsManagementAndPaymentService paymentService) : Controller
     {
         [Route("")]
         [HttpGet]
@@ -27,7 +27,7 @@ namespace Program.Controllers
             var lot = (await mdtr.Send(new GetLotByIdQuery(id))).Data;
             if (lot is null)
                 return RedirectToAction("Index", "Home");
-            if (paymentService.CheckLotCompleted(id))
+            if (await paymentService.CheckLotCompleted(id))
             {
                 lot = (await mdtr.Send(new GetLotByIdQuery(id))).Data;
                 if (lot is null)

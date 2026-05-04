@@ -21,3 +21,21 @@ main-content{
     margin: 5px 0;
     display: inline-block;
 }
+
+.field-validation-error {
+    color: red;
+}
+
+/* Input field */
+input.input-validation-error {
+    border: 1px solid #b94a48;
+}
+
+input.valid {
+    border: 1px solid #16a085;
+}
+
+/* ValidationSummaryTagHelper */
+.validation-summary-errors {
+    color: #b94a48;
+}

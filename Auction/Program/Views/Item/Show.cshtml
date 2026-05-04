@@ -7,14 +7,32 @@
         <img src="@Model.Item.Poster">
     </div>
     <div class="item-desc-cont">
-        <span>@Model.Item.ItemName</span>
-        <span>@Model.Item.ItemType</span>
-        <span>@Model.Item.OwnerUsername</span>
-        <span>@Model.Item.ItemDescription</span>
+        <span class="item-name">@Model.Item.ItemName</span>
+        <span class="item-type">@Model.Item.ItemType</span>
+        <span class="item-owner-username">@Model.Item.OwnerUsername</span>
+        <span class="item-description">@Model.Item.ItemDescription</span>
     </div>
 </div>
 
 <style>
+    .item-name:before,
+    .item-type:before,
+    .item-owner-username:before,
+    .item-description:before{
+        font-weight: bold;
+    }
+    .item-name:before {
+        content: "Name: ";
+    }
+    .item-type:before {
+        content: "Type: ";
+    }
+    .item-owner-username:before {
+        content: "Owner: ";
+    }
+    .item-description:before {
+        content: "Description: ";
+    }
     .container{
         display: flex;
         gap: 20px;

@@ -1,0 +1,61 @@
+﻿@model Program.CreateLotRequest
+@{
+    ViewBag.Title = "Create lot";
+}
+<form method="post" class="create-lot-form">
+    <div asp-validation-summary="All"></div>
+    <fieldset>
+        <legend >
+            Item id
+        </legend>
+        <input value="@ViewBag.ItemId" readonly  />
+    </fieldset>
+    <fieldset>
+        <legend>
+            Duration
+        </legend>
+        <input asp-for="Duration" type="time" required />
+    </fieldset>
+    <fieldset>
+        <legend>
+            Min bet
+        </legend>
+        <input asp-for="MinBetAmount" type="number" required />
+        <select asp-for="MinBetCurrencyType">
+            <option value="rub">RUB</option>
+            <option value="usd">USD</option>
+            <option value="btc">BTC</option>
+            <option value="eth">ETH</option>
+        </select>
+    </fieldset>
+    <fieldset>
+        <legend>
+            Buyout (not required)
+        </legend>
+        <input asp-for="BuyoutAmount" type="number" />
+        <select asp-for="BuyoutCurrencyType">
+            <option value=""></option>
+            <option value="rub">RUB</option>
+            <option value="usd">USD</option>
+            <option value="btc">BTC</option>
+            <option value="eth">ETH</option>
+        </select>
+    </fieldset>
+    <button>Submit</button>
+</form>
+
+<style>
+    .create-lot-form{
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .create-lot-form input{
+        width: 100px;
+    }
+    .create-lot-form button{
+        align-self: flex-start;
+        padding: 3px 20px;
+        margin-left: 5px;
+    }
+</style>

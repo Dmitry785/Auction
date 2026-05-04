@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Application.Services
 {
-    public class PaymentService(IAppDbContext context)
+    public class LotsManagementAndPaymentService(IAppDbContext context)
     {
         public async Task<Result> PlaceBet(Guid userId, Guid lotId, decimal amount)
         {
@@ -22,14 +22,16 @@ namespace Application.Services
                 .FirstOrDefaultAsync(x => x.Id == lotId);
             if (lot is null)
                 return Result.Fail("Couldnt find the lot");
-            if(CheckLotCompleted(lot))
+            if(await CheckLotCompleted(lot))
                 return Result.Fail("Lot completed");
             if(amount < (lot.CurrentBet?.BetAmount.Amount ?? 0) + lot.MinBetCurrency.Amount)
                 return Result.Fail("Wrong amount");
             var user = await context.Users.Include(x=>x.Currencies).FirstOrDefaultAsync(x => x.Id == userId);
             if (user is null)
                 return Result.Fail("Couldnt find the user");
-            if(lot.CurrentBet?.BetParticipant == user)
+            if (lot.LotOwner == user)
+                return Result.Fail("Lot's owner can't place a bet");
+            if (lot.CurrentBet?.BetParticipant == user)
                 return Result.Fail("You have already placed a bet");
             var betMoney = new Money(amount, lot.MinBetCurrency.Type);
             var withdrawOperation = WithdrawMoney(user, betMoney);
@@ -50,20 +52,22 @@ namespace Application.Services
                 .FirstOrDefaultAsync(x => x.Id == lotId);
             if (lot is null)
                 return Result.Fail("Couldnt find the lot");
-            if (CheckLotCompleted(lot))
+            if (await CheckLotCompleted(lot))
                 return Result.Fail("Lot completed");
             if (lot.BuyoutPrice is null)
                 return Result.Fail("Lot havent buyout option");
             var user = await context.Users.Include(x => x.Currencies).FirstOrDefaultAsync(x => x.Id == userId);
             if (user is null)
                 return Result.Fail("Couldnt find the user");
+            if (lot.LotOwner == user)
+                return Result.Fail("Lot's owner can't buyout");
             var withdrawOperation =
                 WithdrawMoney(user, lot.BuyoutPrice);
             if (withdrawOperation.Failed)
                 return withdrawOperation;
             ReturnBetMoney(lot);
-            lot.Completed = true;
             lot.ItemInfo.Owner = user;
+            await MoveExpiredLotToArchive(lot.Id, LotArchiveEndType.Bought, lot.BuyoutPrice);
             await context.SaveChangesAsync();
             return Result.Ok();
         }
@@ -91,34 +95,67 @@ namespace Application.Services
             await context.SaveChangesAsync();
             return Result.Ok();
         }
-        public bool CheckLotCompleted(Guid lotId)
+        public async Task<bool> CheckLotCompleted(Guid lotId)
         {
             var lot = context.Lots
             .Include(x => x.ItemInfo)
             .Include(x=>x.LotOwner)
+                .ThenInclude(x=>x.Currencies)
             .Include(x=>x.CurrentBet)
                 .ThenInclude(x=>x.BetParticipant)
             .FirstOrDefault(x => x.Id == lotId);
             if (lot is null)
                 return true;
-            return CheckLotCompleted(lot);
+            return await CheckLotCompleted(lot);
         }
-        private bool CheckLotCompleted(Lot lot)
+        public async Task<Result<Guid>> CreateNewLot(TimeOnly duration, string itemId, Money minBet, Money? buyoutPrice)
         {
-            if (lot.Completed)
-                return true;
+            var item = context.Items
+                .Include(x=>x.Owner).FirstOrDefault(x => x.Id == itemId);
+            if(item is null)
+                return Result<Guid>.Fail("Item not found");
+            if (context.Lots.FirstOrDefault(x => x.ItemInfo.Id == itemId) is not null)
+                return Result<Guid>.Fail("Lot already exists");
+            var lot = context.Lots.Add(new Lot(item, DateTime.Now,
+                duration.ToTimeSpan(), minBet, item.Owner, buyoutPrice)).Entity;
+            await context.SaveChangesAsync();
+            return Result.Ok(lot.Id);
+        }
+        public async Task<Result> CancelLot(Guid lotId)
+        {
+            var lot = context.Lots.FirstOrDefault(x => x.Id == lotId);
+            if (lot is null)
+                return Result.Fail();
+            await MoveExpiredLotToArchive(lot.Id, LotArchiveEndType.Canceled);
+            return Result.Ok();
+        }
+        private async Task<bool> CheckLotCompleted(Lot lot)
+        {
             if (lot.TimeUntilClosing(DateTime.Now).Ticks < 0)
             {
-                lot.Completed = true;
                 if (lot.CurrentBet is not null)
                 {
                     DepositMoney(lot.LotOwner, lot.CurrentBet.BetAmount);
                     lot.ItemInfo.Owner = lot.CurrentBet.BetParticipant;
+                    await MoveExpiredLotToArchive(lot.Id, LotArchiveEndType.Bought, lot.CurrentBet.BetAmount);
                 }
+                else
+                    await MoveExpiredLotToArchive(lot.Id, LotArchiveEndType.Expired);
                 context.SaveChanges();
                 return true;
             }
             return false;
+        }
+        private async Task MoveExpiredLotToArchive(Guid lotId, LotArchiveEndType endType, Money? boughtForMoney = null)
+        {
+            var lot = await context.Lots
+                .Include(x=>x.ItemInfo)
+                .Include(x=>x.LotOwner).FirstOrDefaultAsync(x => x.Id == lotId);
+            if (lot is null)
+                return;
+            await context.ArchivalLots.AddAsync(new ArchivalLot(lot.ItemInfo,
+                lot.LotOwner, boughtForMoney, endType, DateTime.Now));
+            context.Lots.Remove(lot);
         }
         private Result WithdrawMoney(User user, Money money)
         {
