@@ -19,6 +19,7 @@ public sealed record GetArchiveLotByIdQueryHandler(IAppDbContext context) : IReq
             .Include(x => x.ItemInfo)
                 .ThenInclude(x => x.Owner)
             .Include(x => x.LotOwner)
+            .Include(x=>x.Buyer)
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == request.Id);
         if (lot is null)

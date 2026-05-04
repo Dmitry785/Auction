@@ -7,6 +7,7 @@ using Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
@@ -166,7 +167,7 @@ public static class ClaimsPrincipalExtensions
         return principal.FindFirstValue("linked_account_id");
     }
 }
-public class CmdService(LotsManagementAndPaymentService _paymentService, IMediator _mdtr,
+public class CmdService(LotsManagementAndPaymentService _paymentService, IAppDbContext context,
     ILogger<CmdService> _logger, DefaultDataHelper _defaultDataHelper)
 {
 
@@ -215,6 +216,10 @@ public class CmdService(LotsManagementAndPaymentService _paymentService, IMediat
                 case "add":
                     _defaultDataHelper.AddDefaultData();
                     break;
+                case "clear-archive":
+                    context.ArchivalLots.ExecuteDelete();
+                    context.SaveChanges();
+                    break;
                 default:
                     _logger.LogWarning($"Command \"{command}\" not found");
                     return;
@@ -228,7 +233,7 @@ public class CmdService(LotsManagementAndPaymentService _paymentService, IMediat
     }
     private async Task<Guid> GetUserIdByUsername(string username)
     {
-        return (await _mdtr.Send(new GetAllUsersQuery(x => x.Username == username))).First().Id;
+        return (await context.Users.FirstAsync(x=>x.Username == username)).Id;
     }
     private CurrencyType GetCurrencyType(string type)
     {

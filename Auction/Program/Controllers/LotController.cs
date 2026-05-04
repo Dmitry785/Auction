@@ -14,13 +14,44 @@ using Microsoft.AspNetCore.Identity.Data;
 using Application.Logic.Item;
 using Application.Logic.Lot;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using Application.Logic.ArchiveLot;
 
 namespace Program.Controllers
 {
-    [Route("[controller]/{id:guid}")]
+    [Route("[controller]")]
     public class LotController(IMediator mdtr, LotsManagementAndPaymentService paymentService) : Controller
     {
-        [Route("")]
+        [Route("archival/{id:guid}")]
+        [HttpGet]
+        public async Task<IActionResult> ShowArchivalLot([FromRoute] Guid id)
+        {
+            var lot = (await mdtr.Send(new GetArchiveLotByIdQuery(id))).Data;
+            if (lot is null)
+                return RedirectToAction("Index", "Home");
+            return View(new ArchivalLotViewModel(new ViewModels.Dto.ArchivalLotDto(lot.Id, lot.ItemInfo.Id, lot.LotOwner.Id, lot.EndType.ToString(), 
+                lot.BoughtFor, lot.Buyer, lot.CompletionTime, lot.ItemInfo.Name, lot.LotOwner.Username,
+                lot.ItemInfo.Description, lot.ItemInfo.Type.ToString(), lot.ItemInfo.Poster)));
+        }
+        [Route("{id:guid}/cancel")]
+        [Authorize(Policy = "LinkedToTheOriginalAccount")]
+        [HttpGet]
+        public async Task<IActionResult> Cancel([FromRoute] Guid id)
+        {
+            var lot = (await mdtr.Send(new GetLotByIdQuery(id))).Data;
+            if (lot is null || lot.LotOwner.Id != HttpContext.User.GetUserId())
+            {
+                TempData["ErrorMessage"] = "You are not allowed to cancel this lot";
+                return RedirectToAction("Index", "Home");
+            }
+            var cancelResult = await paymentService.CancelLot(id);
+            if (cancelResult.Failed)
+            {
+                TempData["ErrorMessage"] = cancelResult.ErrorMessage;
+                return RedirectToAction("Index", "Home");
+            }
+            return RedirectToAction("items", "currentUser");
+        }
+        [Route("{id:guid}")]
         [HttpGet]
         public async Task<IActionResult> Show([FromRoute] Guid id)
         {
@@ -33,10 +64,11 @@ namespace Program.Controllers
                 if (lot is null)
                     return RedirectToAction("Index", "Home");
                 return View(new LotViewModel(lot.Id, lot.ItemInfo.Id, lot.LotOwner.Id, lot.ItemInfo.Name, lot.ItemInfo.Description,
-                    lot.ItemInfo.Poster, lot.ItemInfo.Type, lot.LotOwner.Name, lot.BuyoutPrice, lot.MinBetCurrency,
+                    lot.ItemInfo.Poster, lot.ItemInfo.Type, lot.LotOwner.Username, lot.BuyoutPrice, lot.MinBetCurrency,
                     lot.CurrentBet?.BetAmount, lot.CurrentBet?.BetParticipant.Username, lot.StartTime + lot.Duration,
                     false, false, false, false, null, null, true));
             }
+
             var userId = HttpContext.User.GetUserId();
             var hasUserLinkedAccount = HttpContext.User.GetLinkedAccountId() != null;
             await Console.Out.WriteLineAsync(userId.ToString());
@@ -71,7 +103,7 @@ namespace Program.Controllers
                 lot.CurrentBet?.BetAmount, lot.CurrentBet?.BetParticipant.Username, lot.StartTime + lot.Duration,
                 isAuthorized, hasUserLinkedAccount, canUserBet, canUserBuyout, minBet, betCurrency?.Amount, false));
         }
-        [Route("buyout")]
+        [Route("{id:guid}/buyout")]
         [Authorize(Policy = "LinkedToTheOriginalAccount")]
         [HttpGet]
         public async Task<IActionResult> Buyout([FromRoute] Guid id)
@@ -87,7 +119,7 @@ namespace Program.Controllers
             }
             return RedirectToAction("Items", "CurrentUser");
         }
-        [Route("bet")]
+        [Route("{id:guid}/bet")]
         [Authorize(Policy = "LinkedToTheOriginalAccount")]
         [HttpPost]
         public async Task<IActionResult> Bet([FromRoute] Guid id, [FromForm(Name = "amount")]string amountString)

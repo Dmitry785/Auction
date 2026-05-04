@@ -67,7 +67,7 @@ namespace Application.Services
                 return withdrawOperation;
             ReturnBetMoney(lot);
             lot.ItemInfo.Owner = user;
-            await MoveExpiredLotToArchive(lot.Id, LotArchiveEndType.Bought, lot.BuyoutPrice);
+            await MoveExpiredLotToArchive(lot.Id, LotArchiveEndType.Bought, lot.BuyoutPrice, user);
             await context.SaveChangesAsync();
             return Result.Ok();
         }
@@ -123,10 +123,15 @@ namespace Application.Services
         }
         public async Task<Result> CancelLot(Guid lotId)
         {
-            var lot = context.Lots.FirstOrDefault(x => x.Id == lotId);
+            var lot = context.Lots
+                .Include(x=>x.CurrentBet)
+                    .ThenInclude(x=>x.BetParticipant)
+                .FirstOrDefault(x => x.Id == lotId);
             if (lot is null)
                 return Result.Fail();
+            ReturnBetMoney(lot);
             await MoveExpiredLotToArchive(lot.Id, LotArchiveEndType.Canceled);
+            await context.SaveChangesAsync();
             return Result.Ok();
         }
         private async Task<bool> CheckLotCompleted(Lot lot)
@@ -137,7 +142,7 @@ namespace Application.Services
                 {
                     DepositMoney(lot.LotOwner, lot.CurrentBet.BetAmount);
                     lot.ItemInfo.Owner = lot.CurrentBet.BetParticipant;
-                    await MoveExpiredLotToArchive(lot.Id, LotArchiveEndType.Bought, lot.CurrentBet.BetAmount);
+                    await MoveExpiredLotToArchive(lot.Id, LotArchiveEndType.Bought, lot.CurrentBet.BetAmount, lot.CurrentBet.BetParticipant);
                 }
                 else
                     await MoveExpiredLotToArchive(lot.Id, LotArchiveEndType.Expired);
@@ -146,7 +151,7 @@ namespace Application.Services
             }
             return false;
         }
-        private async Task MoveExpiredLotToArchive(Guid lotId, LotArchiveEndType endType, Money? boughtForMoney = null)
+        private async Task MoveExpiredLotToArchive(Guid lotId, LotArchiveEndType endType, Money? boughtFor = null, User? buyer = null)
         {
             var lot = await context.Lots
                 .Include(x=>x.ItemInfo)
@@ -154,7 +159,7 @@ namespace Application.Services
             if (lot is null)
                 return;
             await context.ArchivalLots.AddAsync(new ArchivalLot(lot.ItemInfo,
-                lot.LotOwner, boughtForMoney, endType, DateTime.Now));
+                lot.LotOwner, boughtFor, buyer, endType, DateTime.Now));
             context.Lots.Remove(lot);
         }
         private Result WithdrawMoney(User user, Money money)

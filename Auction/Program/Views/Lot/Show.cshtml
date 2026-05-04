@@ -10,7 +10,7 @@
         <span class="lot-detail lot-item-name">@Model.ItemName</span>
         <span class="lot-detail lot-item-name-type">@Model.ItemType</span>
         <span class="lot-detail lot-expires-at">. . .</span>
-        <span class="lot-detail lot-item-owner">@Model.OwnerName</span>
+        <span class="lot-detail lot-item-owner">@Model.OwnerUsername</span>
         <span class="lot-detail lot-item-desc">@Model.Description</span>
         @if (!Model.IsExpired)
         {
@@ -80,12 +80,30 @@
                 <span class="prohibition">Log in your account to make bet</span>
             }
         }
+        @if(Context.User.GetUserId() == Model.OwnerId)
+        {
+            <div class="cancel">
+                Cancel
+                <a asp-action="confirm" asp-controller="home"
+                   asp-route-to="@Url.Action("cancel","lot", new {Id=Model.Id})"
+                   asp-route-message="Do you confirm cancel your lot @Model.ItemName?"></a>
+            </div>
+        }
     </div>
 </div>
 
 <style>
-    #bet_amount{
-
+    .cancel{
+        position: relative;
+        font-size: 20px;
+        display: inline-block;
+        border: 1px solid blue;
+        border-radius: 7px;
+        padding: 5px 15px;
+    }
+    .cancel a{
+        position: absolute;
+        top: 0;bottom: 0; left: 0;right: 0;
     }
     .bet-container{
         display: flex;

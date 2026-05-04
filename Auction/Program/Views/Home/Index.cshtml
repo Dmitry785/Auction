@@ -2,33 +2,45 @@
 @{
     ViewBag.Title = "Home";
 }
+<div class="load-archival-lots">
+    Load archival items
+</div>
 <div class="lots-container">
     @{
         foreach (var lot in @Model.Lots)
         {
-            <div data-id="@lot.Id" data-owner-id="@lot.OwnerId" class="lot-item" data-expire_at="@lot.ExpiresAt.ToString("o")">
-                <div class="lot-left-part-container">
-                    <img class="lot-item-poster" src="@lot.Poster" alt="item image"/>
+                <div data-id="@lot.Id" data-owner-id="@lot.OwnerId" class="lot-item" data-expire_at="@lot.ExpiresAt.ToString("o")">
+                    <div class="lot-left-part-container">
+                        <img class="lot-item-poster" src="@lot.Poster" alt="item image"/>
+                    </div>
+                    <div class="lot-right-part-container">
+                        <h1 class="lot-item-name">@lot.ItemName</h1>
+                        <h1 class="lot-owner">@lot.OwnerUsername</h1>
+                        <span class="lot-item-desc">
+                            @(lot.ItemDescription.Length > 20 ? lot.ItemDescription.Substring(0, 20) + ". . ." : lot.ItemDescription)
+                        </span>
+                        <span class="lot-time_left">. . .</span>
+                    </div>
                 </div>
-                <div class="lot-right-part-container">
-                    <h1 class="lot-item-name">@lot.ItemName</h1>
-                    <h1 class="lot-item-owner">@lot.OwnerUsername</h1>
-                    <span class="lot-item-desc">
-                        @(lot.ItemDescription.Length > 20 ? lot.ItemDescription.Substring(0, 20) + ". . ." : lot.ItemDescription)
-                    </span>
-                    <span class="lot-item-time_left">. . .</span>
-                </div>
-            </div>
         }
     }
 </div>
 
 <style>
+    .load-archival-lots{
+        border: 1px solid red;
+        border-radius: 7px;
+        padding: 5px 15px;
+        display: inline-block;
+        cursor: pointer;
+        font-size: 20px;
+    }
     .lots-container{
     display: flex;
     flex-direction: column;
     gap: 25px;
     }
+    .archival-lot-item,
     .lot-item{
     display: flex;
     height: 300px;
@@ -78,7 +90,7 @@
     text-overflow: ellipsis;
     max-height: 30px;
     }
-    .lot-item-owner {
+    .lot-owner {
     font-size: 20px;
     margin-left: 5px;
     letter-spacing: 1px;
@@ -88,7 +100,8 @@
     text-overflow: ellipsis;
     cursor: pointer;
     }
-    .lot-item-time_left{
+    .lot-time_left,
+    .lot-expired{
     position: absolute;
     bottom: 5px; right: 5px;
     font-style: italic;
@@ -101,7 +114,7 @@
     }
     }
     @@media(max-width: 600px){
-    .lot-item-time_left, 
+    .lot-time_left,
     .lot-item-owner, 
     .view-button {
     font-size: 16px;
@@ -132,7 +145,7 @@
     $(() => {
         setInterval(function () {
             $(".lot-item:not(.expired)").each(function () {
-                const time = $(this).find('.lot-item-time_left');
+                const time = $(this).find('.lot-time_left');
                 let expires = new Date($(this).data("expire_at"));
                 let now = new Date();
                 let df = expires - now;
@@ -148,13 +161,52 @@
                 time.text(`${d}:${h}:${m}:${s}`);
             })
         }, 1000);
-        $('.lot-item-name').click(function () {
+        $('.lot-item .lot-item-name').click(function () {
             const id = $(this).closest('div[data-id]').data("id");
             window.location.href = `/lot/${id}`;
         });
-        $('.lot-item-owner').dblclick(function () {
+        $('.lot-owner').click(function () {
             const id = $(this).closest('div[data-id]').data("owner-id");
             window.location.href = `/user/${id}`;
+        });
+        $('.load-archival-lots').dblclick(function () {
+            $.get("/archival").done(function (json) {
+                $('.load-archival-lots').remove();
+                console.log(json);
+                for(lot of json){
+                    const lot_id = lot.id;
+                    const lot_owner_id = lot.ownerId;
+                    const lot_end_type = lot.endtype;
+                    const lot_bought_for = lot.boughtFor;
+                    const lot_completion_time = new Date(lot.completionTime);
+                    const lot_item_name = lot.itemName;
+                    const lot_owner_username = lot.ownerUsername;
+                    const lot_item_description = lot.itemDescription;
+                    const lot_poster = lot.poster;
+                        $('.lots-container').prepend(`
+                        <div data-id="${lot_id}" data-owner-id="${lot_owner_id}" class="archival-lot-item">
+                            <div class="lot-left-part-container">
+                                <img class="lot-item-poster" src="${lot_poster}" alt="item image"/>
+                            </div>
+                            <div class="lot-right-part-container">
+                                    <h1 class="lot-item-name">${lot_item_name}</h1>
+                                    <h1 class="lot-owner">${lot_owner_username}</h1>
+                                <span class="lot-item-desc">
+                                    ${lot_item_description}
+                                </span>
+                                <span class="lot-expired">had completed at ${lot_completion_time.toUTCString()}</span>
+                            </div>
+                        </div>`);
+                }
+                $('.archival-lot-item .lot-item-name').click(function () {
+                    const id = $(this).closest('div[data-id]').data("id");
+                    window.location.href = `/lot/archival/${id}`;
+                });
+                $('.lot-owner').click(function () {
+                    const id = $(this).closest('div[data-id]').data("owner-id");
+                    window.location.href = `/user/${id}`;
+                });
+            });
         });
     });
 </script>

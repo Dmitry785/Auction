@@ -19,6 +19,7 @@ public sealed record GetAllArchivalLotsQueryHandler(IAppDbContext context) : IRe
             .Include(x=>x.ItemInfo)
                 .ThenInclude(x=>x.Owner)
             .Include(x => x.LotOwner)
+            .Include(x => x.Buyer)
             .AsNoTracking().ToListAsync();
         if (request.predicate is not null)
             lots = lots.Where(request.predicate!).ToList();

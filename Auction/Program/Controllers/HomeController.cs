@@ -22,13 +22,14 @@ namespace Auction.Controllers
                 x.ItemInfo.Owner.Username, x.ItemInfo.Description, x.ItemInfo.Poster)).ToList();
             return View(new HomeViewModel(lots));
         }
-        /*[Route("/archival")]
+        [Route("/archival")]
         [HttpGet]
         public async Task<IActionResult> LoadArchivalLots()
         {
             return Json((await mdtr.Send(new GetAllArchivalLotsQuery()))
-                .Select(x => new ArchivalLotDto()));
-        }*/
+                .Select(x => new PlainArchivalLotDto(x.Id, x.LotOwner.Id, x.CompletionTime, x.ItemInfo.Name, x.LotOwner.Username,
+                x.ItemInfo.Description, x.ItemInfo.Poster)));
+        }
         [ActionName("About")]
         [HttpGet]
         public IActionResult Index2()

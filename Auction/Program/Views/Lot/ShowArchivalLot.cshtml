@@ -1,0 +1,113 @@
+﻿@model Program.ViewModels.ArchivalLotViewModel
+@{
+    ViewBag.Title = "Lot info";
+}
+<div class="container">
+    <div class="lot-poster">
+        <img src="@Model.Lot.Poster">
+    </div>
+    <div class="lot-details-container">
+        <span class="lot-detail lot-item-name">@Model.Lot.ItemName</span>
+        <span class="lot-detail lot-item-type">@Model.Lot.ItemType</span>
+        <span class="lot-detail lot-item-owner">@Model.Lot.OwnerUsername</span>
+        <span class="lot-detail lot-item-description">@Model.Lot.ItemDescription</span>
+        @if(Model.Lot.BoughtFor is not null && Model.Lot.BoughtFor is not null){
+            <span class="lot-detail lot-bought-for">@Model.Lot.BoughtFor.Amount @Model.Lot.BoughtFor.Type.ToString()</span>
+            <span class="lot-detail lot-buyer">@Model.Lot.Buyer.Username</span>
+        }
+        <span class="lot-detail lot-completion-time">@Model.Lot.CompletionTime</span>
+        <span class="lot-detail lot-end-type">@Model.Lot.EndType</span>
+</div>
+
+<style>
+    .lot-item-type:before,
+    .lot-item-name:before,
+    .lot-item-owner:before,
+    .lot-item-description:before,
+    .lot-bought-for:before,
+    .lot-completion-time:before,
+    .lot-end-type:before,
+    .lot-buyer:before{
+        font-weight: bold;
+    }
+    .lot-item-owner,
+    .lot-item-name,
+    .lot-buyer{
+        cursor: pointer;
+    }
+    .lot-item-owner:hover,
+    .lot-item-name:hover,
+    .lot-buyer:hover{
+        text-decoration: underline;
+    }
+    .lot-item-name:before {
+        content: "Item name: "
+    }
+    .lot-item-type:before {
+        content: "Item type: ";
+    }
+    .lot-buyer:before {
+        content: "Buyer : ";
+    }
+    .lot-item-owner:before {
+        content: "Lot owner: ";
+    }
+    .lot-item-description:before {
+        content: "Item description: ";
+    }
+    .lot-bought-for:before {
+        content: "Bought for: ";
+    }
+    .lot-completion-time:before {
+        content: "Completed at: ";
+    }
+    .lot-end-type:before {
+        content: "Completion type: ";
+    }
+    .container {
+        display: flex;
+        flex-direction: row-reverse;
+        height: max-content;
+        gap: 20px;
+        margin: 20px 10px;
+    }
+    .lot-details-container {
+        flex: 2 1 0;
+        min-width: 0;
+    }
+    .lot-poster {
+        display: flex;
+        flex: 3 1 0;
+        align-items: flex-start;
+        justify-content: center;
+    }
+    .lot-poster img {
+        object-fit: contain;
+        overflow: auto;
+        max-width: 100%;
+        border: 1px solid greenyellow;
+    }
+    .lot-detail {
+        font-size: 24px;
+        display: block;
+    }
+</style>
+
+<script>
+    $(function () {
+        $('.lot-item-name').click(function (){
+            window.location.href = '@Url.Action("Show", "Item", new {Id = Model.Lot.ItemId})';
+        });
+        $('.lot-item-owner').click(function (){
+            window.location.href = '@Url.Action("Show", "User", new { Id = Model.Lot.OwnerId })';
+        });
+    });
+</script>
+@if (Model.Lot.Buyer is not null)
+{
+    <script>
+        $('.lot-buyer').click(function () {
+            window.location.href = '@Url.Action("Show", "User", new { Id = Model.Lot.Buyer.Id })';
+        });
+    </script>
+}

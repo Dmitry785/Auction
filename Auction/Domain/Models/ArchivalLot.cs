@@ -12,11 +12,13 @@ namespace Domain.Models
         public User LotOwner { get; set; } = null!;
         public LotArchiveEndType EndType { get; set; }
         public Money? BoughtFor { get; set; }
+        public User? Buyer { get; set; }
         public DateTime CompletionTime { get; set; }
-        public ArchivalLot(Item itemInfo, User lotOwner, Money? boughtFor, LotArchiveEndType endType, DateTime completionTime)
+        public ArchivalLot(Item itemInfo, User lotOwner, Money? boughtFor, User? buyer, LotArchiveEndType endType, DateTime completionTime)
         {
             Id = Guid.NewGuid();
             ItemInfo = itemInfo;
+            Buyer = buyer;
             LotOwner = lotOwner;
             EndType = endType;
             BoughtFor = boughtFor;

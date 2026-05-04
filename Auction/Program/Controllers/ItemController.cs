@@ -49,7 +49,7 @@ namespace Program.Controllers
         {
             if (data.MinBetAmount == 0)
                 ModelState.AddModelError("Validate", "Min bet amount must be greater than 0");
-            if (data.Duration.Minute == 0)
+            if (data.Duration.Ticks < TimeSpan.FromMinutes(1).Ticks)
                 ModelState.AddModelError("Validate", "Duration must be greater than 1 min");
             if(!CurrencyTypeConverter.TryParse(data.MinBetCurrencyType, out var minBetCurrency))
                 ModelState.AddModelError("Validate", "Duration must be greater than 1 min");
