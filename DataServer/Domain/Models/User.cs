@@ -10,15 +10,15 @@ namespace Domain.Models
     {
         public string Username { get; set; } = null!;
         public string Name { get; set; } = null!;
-        public int PasswordHash { get; set; }
-        public List<RefreshToken> RefreshTokens { get; set; } = null!;
-        public User(string username, string name, int hashPassword, List<RefreshToken> refreshTokens)
+        public string Password { get; set; }
+        public List<Item> Items { get; set; }
+        public User(string username, string name, string password, List<Item> items)
         {
             Id = Guid.NewGuid();
             Username = username;
             Name = name;
-            PasswordHash = hashPassword;
-            RefreshTokens = refreshTokens;
+            Password = password;
+            Items = items;
         }
         public User()
         {

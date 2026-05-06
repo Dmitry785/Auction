@@ -16,39 +16,36 @@ namespace Application.Services
         {
             _address = address;
         }
+        /*public async Task<Result<List<>>> LoadUserItems(string userId)
+        {
+            var response = await Send("loadUserItems", new { Id=userId });
+            var items =
+        }*/
         public async Task<Result<string>> RequestUserId(string username, string password)
         {
-            try
-            {
-                using (HttpClient client = new HttpClient())
-                {
-                    string jsonBody = JsonSerializer.Serialize(new { Username = username, Password = password });
-                    var response = await SendHttpRequest(jsonBody);
-
-                    if (!Guid.TryParse(response, out Guid playerId))
-                        return Result<string>.Fail();
-                    return Result.Ok(playerId.ToString());
-                }
-            }
-            catch { }
-            return Result<string>.Fail();
+            var response = await Send("getUserId", new { Username = username, Password = password });
+            if (!Guid.TryParse(response, out Guid playerId))
+                return Result<string>.Fail();
+            return Result.Ok(playerId.ToString());
         }
-        private async Task<string?> SendHttpRequest(string jsonBody)
+        private async Task<string?> Send(string url, object bodyObj)
         {
-            return Guid.NewGuid().ToString();
+            return await SendHttpRequest(url, JsonSerializer.Serialize(bodyObj));
+        }
+        private async Task<string?> SendHttpRequest(string url, string jsonBody)
+        {
             try
             {
                 using (HttpClient client = new HttpClient())
                 {
                     var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
-                    HttpResponseMessage response = await client.PostAsync(_address, content);
+                    var address = _address + (url.StartsWith("/") ? url : "/" + url);
+                    HttpResponseMessage response = await client.PostAsync(address, content);
 
                     if (response.IsSuccessStatusCode)
                     {
                         string result = await response.Content.ReadAsStringAsync();
-                        if (!Guid.TryParse(result, out Guid playerId))
-                            return null;
-                        return playerId.ToString();
+                        return result;
                     }
                 }
             }
