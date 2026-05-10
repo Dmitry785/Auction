@@ -7,10 +7,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Application.Services;
 public class CommonService(IAppDbContext context)
-{
+{ 
     public List<Item> GetAllItems()
     {
         return context.Items.AsNoTracking().ToList();
@@ -61,5 +62,29 @@ public class CommonService(IAppDbContext context)
         if (user is null)
             return Result<Guid>.Fail();
         return Result.Ok(user.Id);
+    }
+    public Result<Guid> RegisterUser(string username, string password, string name)
+    {
+        var user = context.Users.FirstOrDefault(x => x.Username == username &&
+            x.Password == password);
+        if (user is not null)
+            return Result<Guid>.Fail();
+        user = new User(username, name, password, new List<Item>());
+        context.Users.Add(user);
+        context.SaveChanges();
+        return Result.Ok(user.Id);
+    }
+    public Result<Guid> AddNewItem(string name, string desc, ItemType type, Guid ownerId, string? poster)
+    {
+        var newItem = context.Items.FirstOrDefault(x => x.Name == name);
+        if (newItem is not null)
+            return Result<Guid>.Fail();
+        var user = context.Users.FirstOrDefault(x => x.Id == ownerId);
+        if (user is null)
+            return Result<Guid>.Fail();
+        newItem = new Item(name, desc, type, user, poster);
+        context.Items.Add(newItem);
+        context.SaveChanges();
+        return Result.Ok(newItem.Id);
     }
 }

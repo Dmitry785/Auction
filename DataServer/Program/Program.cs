@@ -1,5 +1,10 @@
 
+using Application.Interfaces;
+using Application.Services;
+using Infrastructure;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace DataServer
 {
@@ -10,12 +15,34 @@ namespace DataServer
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllers();
+            builder.Services.AddSwaggerGen();
+
+            var connectionString = builder.Configuration.GetConnectionString("SqliteConnectionString");
+            builder.Services.AddDbContext<AppDbContext>(x => x.UseSqlite(connectionString));
+            builder.Services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
+            builder.Services.AddTransient<CommonService>();
 
             var app = builder.Build();
 
-            app.MapControllerRoute(
-               name: "default",
-               pattern: "{controller=api}/{action}");
+
+            app.Use(async (c, n) =>
+            {
+                c.Request.EnableBuffering();
+                using (StreamReader sr = new StreamReader(
+                    c.Request.Body,
+                    encoding: System.Text.Encoding.UTF8,
+                    detectEncodingFromByteOrderMarks: false,
+                    bufferSize: 1024,
+                    leaveOpen: true))
+                {
+                    var body = await sr.ReadToEndAsync();
+                    Console.WriteLine($"{c.Connection.RemoteIpAddress?.MapToIPv4()} >> {c.Request.Path}\nbody: {body}");
+                    c.Request.Body.Position = 0;
+                }
+                await n.Invoke();
+            });
+
+            app.MapControllers();
 
             app.Run();
         }
