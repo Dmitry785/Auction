@@ -13,6 +13,16 @@ namespace Program.Controllers
     [ApiController]
     public class ApiController(CommonService service) : Controller
     {
+        [HttpPost("users")]
+        public IActionResult GetAllUsers()
+        {
+            return Ok(service.GetAllUsers().Select(x=>new UserData(x.Id, x.Name, x.Username)));
+        }
+        [HttpPost("items")]
+        public IActionResult GetAllItems()
+        {
+            return Ok(service.GetAllItems().Select(x => new ItemData(x.Id, x.Name, x.Description, x.IsHolding, x.Type, x.Owner.Id, x.Poster)));
+        }
         [HttpPost("userid")]
         public IActionResult GetUserId([FromBody]LoginRequest loginRequest)
         {

@@ -13,15 +13,16 @@ public class Item : BaseModel<Guid>
     public string? Poster { get; set; }
     public ItemType Type { get; set; }
     public User Owner { get; set; } = null!;
+    public Guid OwnerId { get; set; }
     public bool IsHolding { get; set; } = false;
-    public Item(string name, string description, ItemType type, User owner, string? poster = null)
+    public Item(string name, string description, ItemType type, Guid ownerId, string? poster = null)
     {
         Id = Guid.NewGuid();
         Name = name;
         Description = description;
         Poster = poster;
         Type = type;
-        Owner = owner;
+        OwnerId = ownerId;
     }
     public Item()
     {

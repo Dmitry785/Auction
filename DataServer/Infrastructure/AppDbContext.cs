@@ -20,8 +20,8 @@ namespace Infrastructure
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Item>().HasOne(x => x.Owner).WithMany(x => x.Items).HasForeignKey(x => x.OwnerId);
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<User>().HasMany(x => x.Items).WithOne();
         }
     }
 }

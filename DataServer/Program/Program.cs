@@ -24,7 +24,6 @@ namespace DataServer
 
             var app = builder.Build();
 
-
             app.Use(async (c, n) =>
             {
                 c.Request.EnableBuffering();
@@ -36,12 +35,16 @@ namespace DataServer
                     leaveOpen: true))
                 {
                     var body = await sr.ReadToEndAsync();
-                    Console.WriteLine($"{c.Connection.RemoteIpAddress?.MapToIPv4()} >> {c.Request.Path}\nbody: {body}");
+                    Console.WriteLine($"{c.Connection.RemoteIpAddress?.MapToIPv4()} " +
+                        $">> {c.Request.Path}\nbody: {(body.Length == 0 ? "no body" : body)}");
                     c.Request.Body.Position = 0;
                 }
                 await n.Invoke();
             });
 
+            app.UseSwagger();
+            app.UseSwaggerUI();
+            
             app.MapControllers();
 
             app.Run();

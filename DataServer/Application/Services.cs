@@ -11,10 +11,14 @@ using System.Xml.Linq;
 
 namespace Application.Services;
 public class CommonService(IAppDbContext context)
-{ 
+{
     public List<Item> GetAllItems()
     {
-        return context.Items.AsNoTracking().ToList();
+        return context.Items.Include(x=>x.Owner).AsNoTracking().ToList();
+    }
+    public List<User> GetAllUsers()
+    {
+        return context.Users.AsNoTracking().ToList();
     }
     public Result<List<Item>> GetAllUserItems(Guid userId)
     {
@@ -65,24 +69,22 @@ public class CommonService(IAppDbContext context)
     }
     public Result<Guid> RegisterUser(string username, string password, string name)
     {
-        var user = context.Users.FirstOrDefault(x => x.Username == username &&
-            x.Password == password);
-        if (user is not null)
+        if (context.Users.Any(x => x.Username == username &&
+            x.Password == password))
             return Result<Guid>.Fail();
-        user = new User(username, name, password, new List<Item>());
+        var user = new User(username, name, password, new List<Item>());
         context.Users.Add(user);
         context.SaveChanges();
         return Result.Ok(user.Id);
     }
     public Result<Guid> AddNewItem(string name, string desc, ItemType type, Guid ownerId, string? poster)
     {
-        var newItem = context.Items.FirstOrDefault(x => x.Name == name);
-        if (newItem is not null)
+        if (context.Items.Any(x=>x.Name == name))
             return Result<Guid>.Fail();
         var user = context.Users.FirstOrDefault(x => x.Id == ownerId);
         if (user is null)
             return Result<Guid>.Fail();
-        newItem = new Item(name, desc, type, user, poster);
+        var newItem = new Item(name, desc, type, user.Id, poster);
         context.Items.Add(newItem);
         context.SaveChanges();
         return Result.Ok(newItem.Id);
