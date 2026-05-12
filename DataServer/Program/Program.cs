@@ -26,6 +26,8 @@ namespace DataServer
 
             var app = builder.Build();
 
+            app.UseStaticFiles();
+
             app.Use(async (c, n) =>
             {
                 c.Request.EnableBuffering();

@@ -129,7 +129,7 @@ namespace Application.Services
             await context.SaveChangesAsync();
             return Result.Ok(lot.Id);
         }
-        public async Task<Result> UpdateItemsLots(Guid userId)
+        public async Task<Result> UpdateItemsAndLots(Guid userId)
         {
             var owner = context.Users.FirstOrDefault(x => x.Id == userId);
             if (owner is null || owner.OriginalId is null)
@@ -142,7 +142,8 @@ namespace Application.Services
             {
                 if (context.Items.Any(x => x.Id == item.Id.ToString()))
                     continue;
-                var newItem = new Item(item.Id, item.Name, item.Description, item.Type, owner, item.Poster);
+                var poster = item.Poster is null ? null : $"/image/{item.Poster}";
+                var newItem = new Item(item.Id, item.Name, item.Description, item.Type, owner, poster);
                 context.Items.Add(newItem);
             }
             foreach(var item in context.Items.ToList())

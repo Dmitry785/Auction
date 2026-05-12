@@ -31,7 +31,7 @@ namespace Auction
             builder.Services.AddScoped<CmdService>();
             builder.Services.AddHostedService<CmdListenerService>();
             builder.Services.AddSingleton<BanService>();
-            builder.Services.AddTransient(p=>new DataServerApiService("http://127.0.0.1:5218"));
+            builder.Services.AddTransient(p=>new DataServerApiService(StaticAttributes.DataServerHostName));
             builder.Services.AddSwaggerGen();
 
             builder.WebHost.ConfigureKestrel(options =>
@@ -51,7 +51,7 @@ namespace Auction
                             Window = TimeSpan.FromSeconds(60),
                             SegmentsPerWindow = 6
                         }));
-                options.AddFixedWindowLimiter("auth", options =>
+                options.AddFixedWindowLimiter(StaticAttributes.AuthRateLimitName, options =>
                 {
                     options.PermitLimit = 3;
                     options.Window = TimeSpan.FromSeconds(15);
@@ -66,17 +66,15 @@ namespace Auction
                 });
             builder.Services.AddAuthorization(opts =>
             {
-                opts.AddPolicy("LinkedToTheOriginalAccount", p =>
+                opts.AddPolicy(StaticAttributes.HasLinkedAccountPolicyName, p =>
                 {
-                    p.RequireClaim("linked_account_id");
+                    p.RequireClaim(StaticAttributes.HasLinkedAccountPolicyClaim);
                 });
             });
 
             var app = builder.Build();
 
             app.UseMiddleware<DdosProtectionMiddleware>();
-
-            app.UseStaticFiles();
 
             app.Use(async (c, next) =>
             {
@@ -98,6 +96,8 @@ namespace Auction
             app.UseRateLimiter();
 
             app.MapControllers();
+
+            app.UseStaticFiles();
 
             app.Run();
         }

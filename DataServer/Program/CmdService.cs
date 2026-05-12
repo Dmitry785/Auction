@@ -9,6 +9,10 @@ namespace DataServer;
 public class CmdService(AppDbContext context,
     ILogger<CmdService> _logger)
 {
+    private readonly HttpClient _client = new HttpClient()
+    {
+        DefaultRequestHeaders = { { "User-Agent", "MyAuctionDataServer/1.0 (contact: danchenko.d2020@gmail.com) .NET-HttpClient" } }
+    };
 
     public async Task ExecuteAsync(string input)
     {
@@ -55,7 +59,26 @@ public class CmdService(AppDbContext context,
                     {
                         case "item":
                             var item = new Item(parameters[1], parameters[2], 
-                                (ItemType)int.Parse(parameters[3]), Guid.Parse(parameters[4]), parameters[5]);
+                                (ItemType)int.Parse(parameters[3]), Guid.Parse(parameters[4]));
+                            if (parameters.Length > 5)
+                            {
+                                var imagePathGuid = Guid.NewGuid().ToString();
+                                item.Poster = imagePathGuid + Path.GetExtension(parameters[5]);
+                                if (Uri.TryCreate(parameters[5], UriKind.Absolute, out Uri? uriResult)
+                                    && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
+                                {
+                                    var bytes = await _client.GetByteArrayAsync(parameters[5]);
+
+                                    await File.WriteAllBytesAsync(Path.Combine("wwwroot/images",
+                                    imagePathGuid + Path.GetExtension(parameters[5])), bytes);
+                                }
+                                else if (File.Exists(parameters[5]))
+                                {
+                                    File.Copy(parameters[5], Path.Combine("wwwroot/images",
+                                    imagePathGuid + Path.GetExtension(parameters[5])));
+                                }
+                                
+                            }
                             context.Items.Add(item);
                             context.SaveChanges();
                             break;

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Program.ViewModels;
 using Program.ViewModels.Dto;
+using System.Net.Http;
 
 namespace Auction.Controllers
 {

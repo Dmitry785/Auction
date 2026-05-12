@@ -11,6 +11,7 @@ using System.Security.Claims;
 using Application.Logic.Item;
 using Program.ViewModels.Dto;
 using Application.Logic.Lot;
+using Auction;
 
 namespace Program.Controllers
 {
@@ -35,7 +36,7 @@ namespace Program.Controllers
             ViewBag.SelectedPageName = "Account";
             return View(new CurrentUserViewModel(user.Username, user.Name, user.RegisterDate, user.Currencies));
         }
-        [Authorize(Policy = "LinkedToTheOriginalAccount")]
+        [Authorize(Policy = StaticAttributes.HasLinkedAccountPolicyName)]
         [HttpGet]
         public async Task<IActionResult> Items()
         {
@@ -47,7 +48,7 @@ namespace Program.Controllers
                 return RedirectToAction("logout", "login");
             var user = userResult.Data!;
             ViewBag.SelectedPageName = "Account";
-            var dataServerItems = await paymentService.UpdateItemsLots(user.Id);
+            var dataServerItems = await paymentService.UpdateItemsAndLots(user.Id);
             if (dataServerItems.Failed)
             {
                 TempData["ErrorMessage"] = "Could not load the items";
@@ -89,7 +90,7 @@ namespace Program.Controllers
         {
             new Claim(ClaimTypes.Name, username),
             new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-            new Claim("linked_account_id", userGameId.ToString())
+            new Claim(StaticAttributes.HasLinkedAccountPolicyClaim, userGameId.ToString())
         };
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);

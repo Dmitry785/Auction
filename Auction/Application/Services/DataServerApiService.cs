@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -13,9 +14,21 @@ namespace Application.Services;
 public class DataServerApiService
 {
     private readonly string _address;
+    private readonly HttpClient _client = new HttpClient();
     public DataServerApiService(string address)
     {
         _address = address;
+    }
+    public async Task<Result<(string, byte[])>> LoadImage(string imageName)
+    {
+        var response = await _client.GetAsync($"{_address}/images/{imageName}");
+
+        if (!response.IsSuccessStatusCode) 
+            return Result<(string, byte[])>.Fail();
+
+        var contentType = response.Content.Headers.ContentType?.ToString() ?? "image/jpeg";
+        var imageBytes = await response.Content.ReadAsByteArrayAsync();
+        return Result.Ok((contentType, imageBytes));
     }
     public async Task<Result> MoveItem(string itemId, string ownerId)
     {
@@ -63,17 +76,14 @@ public class DataServerApiService
         var jsonBody = JsonSerializer.Serialize(bodyObj);
         try
         {
-            using (HttpClient client = new HttpClient())
-            {
-                var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
-                var address = _address + (url.StartsWith("/") ? url : "/" + url);
-                HttpResponseMessage response = await client.PostAsync(address, content);
+            var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+            var address = _address + (url.StartsWith("/") ? url : "/" + url);
+            HttpResponseMessage response = await _client.PostAsync(address, content);
 
-                if (response.IsSuccessStatusCode)
-                {
-                    string result = await response.Content.ReadAsStringAsync();
-                    return result;
-                }
+            if (response.IsSuccessStatusCode)
+            {
+                string result = await response.Content.ReadAsStringAsync();
+                return result;
             }
         }
         catch{}

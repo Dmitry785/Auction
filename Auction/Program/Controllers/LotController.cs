@@ -15,6 +15,7 @@ using Application.Logic.Item;
 using Application.Logic.Lot;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using Application.Logic.ArchiveLot;
+using Auction;
 
 namespace Program.Controllers
 {
@@ -33,7 +34,7 @@ namespace Program.Controllers
                 lot.ItemInfo.Description, lot.ItemInfo.Type.ToString(), lot.ItemInfo.Poster)));
         }
         [Route("{id:guid}/cancel")]
-        [Authorize(Policy = "LinkedToTheOriginalAccount")]
+        [Authorize(Policy = StaticAttributes.HasLinkedAccountPolicyName)]
         [HttpGet]
         public async Task<IActionResult> Cancel([FromRoute] Guid id)
         {
@@ -104,7 +105,7 @@ namespace Program.Controllers
                 isAuthorized, hasUserLinkedAccount, canUserBet, canUserBuyout, minBet, betCurrency?.Amount, false));
         }
         [Route("{id:guid}/buyout")]
-        [Authorize(Policy = "LinkedToTheOriginalAccount")]
+        [Authorize(Policy = StaticAttributes.HasLinkedAccountPolicyName)]
         [HttpGet]
         public async Task<IActionResult> Buyout([FromRoute] Guid id)
         {
@@ -120,7 +121,7 @@ namespace Program.Controllers
             return RedirectToAction("Items", "CurrentUser");
         }
         [Route("{id:guid}/bet")]
-        [Authorize(Policy = "LinkedToTheOriginalAccount")]
+        [Authorize(Policy = StaticAttributes.HasLinkedAccountPolicyName)]
         [HttpPost]
         public async Task<IActionResult> Bet([FromRoute] Guid id, [FromForm(Name = "amount")]string amountString)
         {

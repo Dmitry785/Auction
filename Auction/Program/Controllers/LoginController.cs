@@ -12,6 +12,7 @@ using Application.Services;
 using Program.ViewModels;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.RateLimiting;
+using Auction;
 
 namespace Program.Controllers
 {
@@ -31,7 +32,7 @@ namespace Program.Controllers
             return View(new LoginRequest(string.Empty, string.Empty));
         }
         [HttpPost]
-        [EnableRateLimiting("auth")]
+        [EnableRateLimiting(StaticAttributes.AuthRateLimitName)]
         public async Task<IActionResult> Login([FromQuery]string? returnUrl, [FromForm]LoginRequest loginRequest)
         {
             if (!ModelState.IsValid)
@@ -50,7 +51,7 @@ namespace Program.Controllers
             };
             var getUserByIdResult = await mdtr.Send(new GetUserByIdQuery(userId));
             if (getUserByIdResult.Success && getUserByIdResult.Data!.OriginalId is not null)
-                claims.Add(new Claim("linked_account_id", getUserByIdResult.Data!.OriginalId));
+                claims.Add(new Claim(StaticAttributes.HasLinkedAccountPolicyClaim, getUserByIdResult.Data!.OriginalId));
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
             var authProperties = new AuthenticationProperties { IsPersistent = true };
@@ -72,7 +73,7 @@ namespace Program.Controllers
             return View(new RegisterRequest(string.Empty, string.Empty, string.Empty));
         }
         [HttpPost]
-        [EnableRateLimiting("auth")]
+        [EnableRateLimiting(StaticAttributes.AuthRateLimitName)]
         public async Task<IActionResult> Register([FromQuery] string? returnUrl, [FromForm] RegisterRequest registerRequest)
         {
             if (!ModelState.IsValid)

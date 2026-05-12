@@ -15,6 +15,7 @@ using Application.Logic.Item;
 using Application.Logic.Lot;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using Application.Common;
+using Auction;
 
 namespace Program.Controllers
 {
@@ -36,7 +37,7 @@ namespace Program.Controllers
         }
         [Route("{id}/createLot")]
         [HttpGet]
-        [Authorize(Policy = "LinkedToTheOriginalAccount")]
+        [Authorize(Policy = StaticAttributes.HasLinkedAccountPolicyName)]
         public IActionResult CreateLot([FromRoute]string id)
         {
             ViewBag.ItemId = id;
@@ -44,7 +45,7 @@ namespace Program.Controllers
         }
         [Route("{id}/createLot")]
         [HttpPost]
-        [Authorize(Policy = "LinkedToTheOriginalAccount")]
+        [Authorize(Policy = StaticAttributes.HasLinkedAccountPolicyName)]
         public async Task<IActionResult> CreateLot([FromRoute] string id, [FromForm]CreateLotRequest data)
         {
             if (data.MinBetAmount == 0)
