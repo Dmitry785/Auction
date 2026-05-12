@@ -2,6 +2,6 @@
 
 namespace Program
 {
-    public sealed record UserData(Guid id, string name, string username);
-    public sealed record ItemData(Guid id, string name, string description, bool isHolding, ItemType type, Guid ownerId, string? poster);
+    public sealed record UserData(string id, string name, string username);
+    public sealed record ItemData(string id, string name, string description, ItemType type, string ownerId, string? poster);
 }

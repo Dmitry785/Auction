@@ -1,4 +1,5 @@
 ﻿using Application.Common;
+using Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,50 +8,56 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Application.Services
-{
-    public class DataServerApiService
-    {
-        private readonly string _address;
-        public DataServerApiService(string address)
-        {
-            _address = address;
-        }
-        /*public async Task<Result<List<>>> LoadUserItems(string userId)
-        {
-            var response = await Send("loadUserItems", new { Id=userId });
-            var items =
-        }*/
-        public async Task<Result<string>> RequestUserId(string username, string password)
-        {
-            var response = await Send("getUserId", new { Username = username, Password = password });
-            if (!Guid.TryParse(response, out Guid playerId))
-                return Result<string>.Fail();
-            return Result.Ok(playerId.ToString());
-        }
-        private async Task<string?> Send(string url, object bodyObj)
-        {
-            return await SendHttpRequest(url, JsonSerializer.Serialize(bodyObj));
-        }
-        private async Task<string?> SendHttpRequest(string url, string jsonBody)
-        {
-            try
-            {
-                using (HttpClient client = new HttpClient())
-                {
-                    var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
-                    var address = _address + (url.StartsWith("/") ? url : "/" + url);
-                    HttpResponseMessage response = await client.PostAsync(address, content);
+namespace Application.Services;
 
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string result = await response.Content.ReadAsStringAsync();
-                        return result;
-                    }
+public class DataServerApiService
+{
+    private readonly string _address;
+    public DataServerApiService(string address)
+    {
+        _address = address;
+    }
+    public async Task<Result<List<DataServerItemData>>> LoadUserItems(string userOriginalId)
+    {
+        var response = await Send("useritems", userOriginalId);
+        if(string.IsNullOrEmpty(response))
+            return Result<List<DataServerItemData>>.Fail();
+        var itemsList = JsonSerializer.Deserialize<List<DataServerItemData>>(response, new JsonSerializerOptions()
+        {
+            PropertyNameCaseInsensitive = true
+        });
+        if (itemsList is null)
+            return Result<List<DataServerItemData>>.Fail();
+        return Result.Ok(itemsList);
+    }
+    public async Task<Result<string>> RequestUserId(string username, string password)
+    {
+        var response = await Send("userid", new { Username = username, Password = password });
+        if (!Guid.TryParse(response?.Trim('\"'), out Guid playerId))
+            return Result<string>.Fail();
+        return Result.Ok(playerId.ToString());
+    }
+    private async Task<string?> Send(string url, object bodyObj)
+    {
+        var jsonBody = JsonSerializer.Serialize(bodyObj);
+        try
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+                var address = _address + (url.StartsWith("/") ? url : "/" + url);
+                HttpResponseMessage response = await client.PostAsync(address, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string result = await response.Content.ReadAsStringAsync();
+                    return result;
                 }
             }
-            catch{}
-            return null;
         }
+        catch{}
+        return null;
     }
 }
+public sealed record DataServerUserData(string Id, string Name, string Username);
+public sealed record DataServerItemData(string Id, string Name, string Description, ItemType Type, string OwnerId, string? Poster);

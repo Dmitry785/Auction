@@ -121,6 +121,26 @@ namespace Application.Services
             await context.SaveChangesAsync();
             return Result.Ok(lot.Id);
         }
+        public void UpdateItemsLots(List<DataServerItemData> existingItems, Guid userId)
+        {
+            var owner = context.Users.FirstOrDefault(x => x.Id == userId);
+            if (owner is null)
+                return;
+            foreach(var item in existingItems)
+            {
+                if (context.Items.Any(x => x.Id == item.Id.ToString()))
+                    continue;
+                var newItem = new Item(item.Id, item.Name, item.Description, item.Type, owner, item.Poster);
+                context.Items.Add(newItem);
+            }
+            foreach(var item in context.Items.ToList())
+            {
+                if (existingItems.Any(x => x.Id == item.Id.ToString()))
+                    continue;
+                context.Items.Remove(item);
+            }
+            context.SaveChanges();
+        }
         public async Task<Result> CancelLot(Guid lotId)
         {
             var lot = context.Lots

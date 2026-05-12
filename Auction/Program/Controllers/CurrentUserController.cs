@@ -47,14 +47,20 @@ namespace Program.Controllers
                 return RedirectToAction("logout", "login");
             var user = userResult.Data!;
             ViewBag.SelectedPageName = "Account";
+            var dataServerItems = await apiService.LoadUserItems(user.OriginalId!);
+            if (!dataServerItems.Success)
+            {
+                TempData["ErrorMessage"] = "Could not load the items";
+                //return RedirectToAction("index", "currentUser");
+            }
+            else
+                paymentService.UpdateItemsLots(dataServerItems.Data!, userId);
+
             var itemsTasks = (await mdtr.Send(new GetAllItemsQuery(x => x.Owner.Id == user.Id)))
                 .Select(async x=> {
                     var lot = (await mdtr.Send(new GetAllLotsQuery(l => l.ItemInfo.Id == x.Id))).FirstOrDefault();
-                    if (lot is null || await paymentService.CheckLotCompleted(lot.Id))
-                        return new CurrentUserItemDto(x.Name, x.Poster, x.Type.ToString(),
-                            x.Id, null);
                     return new CurrentUserItemDto(x.Name, x.Poster, x.Type.ToString(),
-                        x.Id, lot.Id);
+                        x.Id, (lot is null?null:((await paymentService.CheckLotCompleted(lot.Id) ? null : lot.Id))));
                 });
             return View(new CurrentUserItemsViewModel(
                 (await Task.WhenAll(itemsTasks)).ToList()));

@@ -20,7 +20,9 @@ namespace DataServer
             var connectionString = builder.Configuration.GetConnectionString("SqliteConnectionString");
             builder.Services.AddDbContext<AppDbContext>(x => x.UseSqlite(connectionString));
             builder.Services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
-            builder.Services.AddTransient<CommonService>();
+            builder.Services.AddTransient<CommonService>(); 
+            builder.Services.AddScoped<CmdService>();
+            builder.Services.AddHostedService<CmdListenerService>();
 
             var app = builder.Build();
 

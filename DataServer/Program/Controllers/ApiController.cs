@@ -16,12 +16,12 @@ namespace Program.Controllers
         [HttpPost("users")]
         public IActionResult GetAllUsers()
         {
-            return Ok(service.GetAllUsers().Select(x=>new UserData(x.Id, x.Name, x.Username)));
+            return Ok(service.GetAllUsers().Select(x=>new UserData(x.Id.ToString(), x.Name, x.Username)));
         }
         [HttpPost("items")]
         public IActionResult GetAllItems()
         {
-            return Ok(service.GetAllItems().Select(x => new ItemData(x.Id, x.Name, x.Description, x.IsHolding, x.Type, x.Owner.Id, x.Poster)));
+            return Ok(service.GetAllItems().Select(x => new ItemData(x.Id.ToString(), x.Name, x.Description, x.Type, x.Owner.Id.ToString(), x.Poster)));
         }
         [HttpPost("userid")]
         public IActionResult GetUserId([FromBody]LoginRequest loginRequest)
@@ -32,12 +32,14 @@ namespace Program.Controllers
             return Ok(userId.Data!);
         }
         [HttpPost("userItems")]
-        public IActionResult GetUserItems([FromBody] Guid userId)
+        public IActionResult GetUserItems([FromBody] Guid id)
         {
-            var items = service.GetAllUserItems(userId);
+            var items = service.GetAllUserItems(id);
             if (items.Failed)
                 return NotFound();
-            return Ok(items.Data!);
+            return Ok(items.Data!
+                .Select(x => new ItemData(x.Id.ToString(), x.Name, 
+                x.Description, x.Type, x.Owner.Id.ToString(), x.Poster)));
         }
         [HttpPost("hold")]
         public IActionResult HoldItem([FromBody] Guid itemId)

@@ -28,12 +28,12 @@ namespace Domain.Models
     }
     public enum ItemType
     {
-       GameSkin,
-Nft,
-Service,
-Product,
-Usual,
-Drug,
-Other
+        GameSkin,
+        Nft,
+        Service,
+        Product,
+        Usual,
+        Drug,
+        Other
     }
 }

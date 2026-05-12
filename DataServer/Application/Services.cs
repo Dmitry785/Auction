@@ -25,7 +25,7 @@ public class CommonService(IAppDbContext context)
         var user = context.Users.FirstOrDefault(x => x.Id == userId);
         if (user is null)
             return Result<List<Item>>.Fail();
-        return Result.Ok(context.Items.AsNoTracking().Where(x => x.Owner == user).ToList());
+        return Result.Ok(context.Items.Include(x=>x.Owner).AsNoTracking().Where(x => x.Owner == user).ToList());
     }
     public Result HoldItem(Guid itemId)
     {

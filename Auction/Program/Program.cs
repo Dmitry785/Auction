@@ -29,8 +29,10 @@ namespace Auction
             builder.Services.AddTransient<DefaultDataHelper>();
             builder.Services.AddTransient<LotsManagementAndPaymentService>();
             builder.Services.AddScoped<CmdService>();
+            builder.Services.AddHostedService<CmdListenerService>();
             builder.Services.AddSingleton<BanService>();
-            builder.Services.AddTransient(p=>new DataServerApiService("address"));
+            builder.Services.AddTransient(p=>new DataServerApiService("http://127.0.0.1:5218"));
+            builder.Services.AddSwaggerGen();
 
             builder.WebHost.ConfigureKestrel(options =>
             {
@@ -56,8 +58,6 @@ namespace Auction
                 });
             });
 
-            builder.Services.AddSwaggerGen();
-
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(p =>
                 {
@@ -71,8 +71,6 @@ namespace Auction
                     p.RequireClaim("linked_account_id");
                 });
             });
-
-            builder.Services.AddHostedService<CmdListenerService>();
 
             var app = builder.Build();
 
@@ -113,6 +111,11 @@ public class DefaultDataHelper
     {
         _context = context;
         _ls = ls;
+    }
+    public void ResetDatabase()
+    {
+        _context.Database.EnsureDeleted();
+        _context.Database.EnsureCreated();
     }
     public void AddDefaultData()
     {
@@ -165,108 +168,5 @@ public static class ClaimsPrincipalExtensions
     public static string? GetLinkedAccountId(this ClaimsPrincipal principal)
     {
         return principal.FindFirstValue("linked_account_id");
-    }
-}
-public class CmdService(LotsManagementAndPaymentService _paymentService, IAppDbContext context,
-    ILogger<CmdService> _logger, DefaultDataHelper _defaultDataHelper)
-{
-
-   public async Task ExecuteAsync(string input)
-    {
-        await HandleCommand(input);
-    }
-    private async Task HandleCommand(string? input)
-    {
-        if (string.IsNullOrEmpty(input))
-            return;
-        var inputStringSplit = input.Split();
-        string command = inputStringSplit[0];
-        string[] parameters = new string[0];
-        if (command.Length > 1)
-            parameters = new string[command.Length - 1];
-        Array.Copy(inputStringSplit, 1, parameters, 0, inputStringSplit.Length - 1);
-        try
-        {
-            switch (command)
-            {
-                case "deposit":
-                    var username = parameters[0];
-                    var moneyAmount = decimal.Parse(parameters[1]);
-                    var moneyType = GetCurrencyType(parameters[2]);
-                    var result = await _paymentService.DepositMoney(await GetUserIdByUsername(username),
-                        new Money(moneyAmount, moneyType));
-                    if (result.Failed)
-                    {
-                        _logger.LogWarning($"Command \"{command}\" >> {result.ErrorMessage}");
-                        return;
-                    }
-                    break;
-                case "withdraw":
-                    username = parameters[0];
-                    moneyAmount = decimal.Parse(parameters[1]);
-                    moneyType = GetCurrencyType(parameters[2]);
-                    result = await _paymentService.WithdrawMoney(await GetUserIdByUsername(username),
-                        new Money(moneyAmount, moneyType));
-                    if (result.Failed)
-                    {
-                        _logger.LogWarning($"Command \"{command}\" >> {result.ErrorMessage}");
-                        return;
-                    }
-                    break;
-                case "add":
-                    _defaultDataHelper.AddDefaultData();
-                    break;
-                case "clear-archive":
-                    context.ArchivalLots.ExecuteDelete();
-                    context.SaveChanges();
-                    break;
-                default:
-                    _logger.LogWarning($"Command \"{command}\" not found");
-                    return;
-            }
-            _logger.LogWarning($"Successful execution command \"{command}\"");
-        }
-        catch
-        {
-            _logger.LogWarning($"Failed to execute command \"{input}\"");
-        }
-    }
-    private async Task<Guid> GetUserIdByUsername(string username)
-    {
-        return (await context.Users.FirstAsync(x=>x.Username == username)).Id;
-    }
-    private CurrencyType GetCurrencyType(string type)
-    {
-        switch (type)
-        {
-            case "rub":
-                return CurrencyType.RUB;
-            case "usd":
-                return CurrencyType.USD;
-            case "btc":
-                return CurrencyType.BTC;
-            case "eth":
-                return CurrencyType.ETH;
-        }
-        throw new Exception("parse exception");
-    }
-}
-public class CmdListenerService(IServiceProvider _serviceProvider,
-    ILogger<CmdListenerService> _logger) : BackgroundService
-{
-
-    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Cmd Service has started");
-        await Task.Run(async () =>
-        {
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                var input = await Task.Run(() => Console.ReadLine(), cancellationToken);
-                if (string.IsNullOrEmpty(input)) continue;
-                var scope = _serviceProvider.CreateScope();
-                await scope.ServiceProvider.GetRequiredService<CmdService>().ExecuteAsync(input);
-            }
-        }, cancellationToken);
     }
 }
