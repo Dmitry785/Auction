@@ -49,6 +49,8 @@ namespace Application.Services
                     .ThenInclude(x => x.BetParticipant)
                         .ThenInclude(x => x.Currencies)
                 .Include(x=>x.ItemInfo)
+                .Include(x=>x.LotOwner)
+                    .ThenInclude(x=>x.Currencies)
                 .FirstOrDefaultAsync(x => x.Id == lotId);
             if (lot is null)
                 return Result.Fail("Couldnt find the lot");
@@ -71,6 +73,7 @@ namespace Application.Services
                 DepositMoney(user, lot.BuyoutPrice);
                 return Result.Fail("Unable to move the item to the new owner");
             }
+            DepositMoney(lot.LotOwner, lot.BuyoutPrice);
             ReturnBetMoney(lot);
             lot.ItemInfo.Owner = user;
             await MoveExpiredLotToArchive(lot.Id, LotArchiveEndType.Bought, lot.BuyoutPrice, user);
@@ -146,13 +149,16 @@ namespace Application.Services
                 var newItem = new Item(item.Id, item.Name, item.Description, item.Type, owner, poster);
                 context.Items.Add(newItem);
             }
-            foreach(var item in context.Items.ToList())
+            foreach(var item in context.Items.Where(x=>x.Owner.Id == owner.Id).ToList())
             {
                 if (existingItems.Any(x => x.Id == item.Id.ToString()))
                     continue;
                 var lot = context.Lots.FirstOrDefault(x => x.ItemInfo.Id == item.Id);
                 if (lot is not null)
+                {
                     ReturnBetMoney(lot);
+                    context.Lots.Remove(lot);
+                }
                 context.Items.Remove(item);
             }
             context.SaveChanges();

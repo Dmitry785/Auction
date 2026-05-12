@@ -25,7 +25,7 @@ namespace Infrastructure
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<User>().HasIndex(x => x.OriginalId).IsUnique();
-            modelBuilder.Entity<User>().HasIndex(x => x.Username).IsUnique();
+            modelBuilder.Entity<User>().HasIndex(x => x.Username).IsUnique();/*
             modelBuilder.Entity<Lot>().OwnsOne(l => l.CurrentBet, bet =>
             {
                 bet.HasOne(b => b.BetParticipant)
@@ -35,12 +35,12 @@ namespace Infrastructure
             modelBuilder.Entity<Lot>()
                 .HasOne(l => l.ItemInfo)
                 .WithMany()
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Lot>()
                 .HasOne(l => l.LotOwner)
                 .WithMany()
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);*/
         }
     }
 }

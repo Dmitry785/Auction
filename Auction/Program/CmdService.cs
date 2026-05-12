@@ -51,6 +51,34 @@ public class CmdService(LotsManagementAndPaymentService _paymentService, IAppDbC
                         return;
                     }
                     break;
+                case "show":
+                    switch (parameters[0])
+                    {
+                        case "items":
+                            foreach (var item in context.Items.Include(x => x.Owner))
+                            {
+                                Console.WriteLine($"Id\t\t{item.Id}\nName\t\t{item.Name}\nOwner\t\t{item.Owner.Id}" +
+                                    $"\nPoster\t\t{item.Poster}\nDescription\t{item.Description}\n");
+                            }
+                            break;
+                        case "users":
+                            foreach (var user in context.Users)
+                            {
+                                Console.WriteLine($"Id\t\t{user.Id}\nName\t\t{user.Name}\nUsername\t{user.Username}" +
+                                    $"\nPassword\t{user.PasswordHash}\n");
+                            }
+                            break;
+                        case "lots":
+                            foreach (var lot in context.Lots.Include(x=>x.LotOwner).Include(x=>x.ItemInfo))
+                            {
+                                Console.WriteLine($"Id\t\t{lot.Id}\nItem\t\t{lot.ItemInfo.Id}\nOwner\t{lot.LotOwner.Id}");
+                            }
+                            break;
+                        default:
+                            Console.WriteLine("show {items, users, lots}");
+                            break;
+                    }
+                    break;
                 case "add":
                     _defaultDataHelper.AddDefaultData();
                     break;
