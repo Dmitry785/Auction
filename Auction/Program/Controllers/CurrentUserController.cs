@@ -47,14 +47,11 @@ namespace Program.Controllers
                 return RedirectToAction("logout", "login");
             var user = userResult.Data!;
             ViewBag.SelectedPageName = "Account";
-            var dataServerItems = await apiService.LoadUserItems(user.OriginalId!);
-            if (!dataServerItems.Success)
+            var dataServerItems = await paymentService.UpdateItemsLots(user.Id);
+            if (dataServerItems.Failed)
             {
                 TempData["ErrorMessage"] = "Could not load the items";
-                //return RedirectToAction("index", "currentUser");
             }
-            else
-                paymentService.UpdateItemsLots(dataServerItems.Data!, userId);
 
             var itemsTasks = (await mdtr.Send(new GetAllItemsQuery(x => x.Owner.Id == user.Id)))
                 .Select(async x=> {

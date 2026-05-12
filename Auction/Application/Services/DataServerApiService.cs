@@ -17,6 +17,27 @@ public class DataServerApiService
     {
         _address = address;
     }
+    public async Task<Result> MoveItem(string itemId, string ownerId)
+    {
+        var response = await Send("move", new { ItemId =itemId, NewOwnerId  = ownerId});
+        if (response is null)
+            return Result<List<DataServerItemData>>.Fail();
+        return Result.Ok();
+    }
+    public async Task<Result> HoldItem(string itemId)
+    {
+        var response = await Send("hold", itemId);
+        if (response is null)
+            return Result<List<DataServerItemData>>.Fail();
+        return Result.Ok();
+    }
+    public async Task<Result> UnholdItem(string itemId)
+    {
+        var response = await Send("unhold", itemId);
+        if (response is null)
+            return Result<List<DataServerItemData>>.Fail();
+        return Result.Ok();
+    }
     public async Task<Result<List<DataServerItemData>>> LoadUserItems(string userOriginalId)
     {
         var response = await Send("useritems", userOriginalId);

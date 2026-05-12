@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Application.Services
 {
-    public class LotsManagementAndPaymentService(IAppDbContext context)
+    public class LotsManagementAndPaymentService(IAppDbContext context, DataServerApiService apiService)
     {
         public async Task<Result> PlaceBet(Guid userId, Guid lotId, decimal amount)
         {
@@ -57,14 +57,20 @@ namespace Application.Services
             if (lot.BuyoutPrice is null)
                 return Result.Fail("Lot havent buyout option");
             var user = await context.Users.Include(x => x.Currencies).FirstOrDefaultAsync(x => x.Id == userId);
-            if (user is null)
+            if (user is null || user.OriginalId is null)
                 return Result.Fail("Couldnt find the user");
             if (lot.LotOwner == user)
                 return Result.Fail("Lot's owner can't buyout");
+
             var withdrawOperation =
                 WithdrawMoney(user, lot.BuyoutPrice);
             if (withdrawOperation.Failed)
                 return withdrawOperation;
+            if ((await apiService.MoveItem(lot.ItemInfo.Id, user.OriginalId)).Failed)
+            {
+                DepositMoney(user, lot.BuyoutPrice);
+                return Result.Fail("Unable to move the item to the new owner");
+            }
             ReturnBetMoney(lot);
             lot.ItemInfo.Owner = user;
             await MoveExpiredLotToArchive(lot.Id, LotArchiveEndType.Bought, lot.BuyoutPrice, user);
@@ -116,17 +122,23 @@ namespace Application.Services
                 return Result<Guid>.Fail("Item not found");
             if (context.Lots.FirstOrDefault(x => x.ItemInfo.Id == itemId) is not null)
                 return Result<Guid>.Fail("Lot already exists");
+            if((await apiService.HoldItem(itemId)).Failed)
+                return Result<Guid>.Fail("Unable to hold the item");
             var lot = context.Lots.Add(new Lot(item, DateTime.Now,
                 duration.ToTimeSpan(), minBet, item.Owner, buyoutPrice)).Entity;
             await context.SaveChangesAsync();
             return Result.Ok(lot.Id);
         }
-        public void UpdateItemsLots(List<DataServerItemData> existingItems, Guid userId)
+        public async Task<Result> UpdateItemsLots(Guid userId)
         {
             var owner = context.Users.FirstOrDefault(x => x.Id == userId);
-            if (owner is null)
-                return;
-            foreach(var item in existingItems)
+            if (owner is null || owner.OriginalId is null)
+                return Result.Fail();
+            var existingItemsResult = await apiService.LoadUserItems(owner.OriginalId);
+            if(existingItemsResult.Failed)
+                return Result.Fail();
+            var existingItems = existingItemsResult.Data!;
+            foreach (var item in existingItems)
             {
                 if (context.Items.Any(x => x.Id == item.Id.ToString()))
                     continue;
@@ -137,18 +149,24 @@ namespace Application.Services
             {
                 if (existingItems.Any(x => x.Id == item.Id.ToString()))
                     continue;
+                var lot = context.Lots.FirstOrDefault(x => x.ItemInfo.Id == item.Id);
+                if (lot is not null)
+                    ReturnBetMoney(lot);
                 context.Items.Remove(item);
             }
             context.SaveChanges();
+            return Result.Ok();
         }
         public async Task<Result> CancelLot(Guid lotId)
         {
             var lot = context.Lots
+                .Include(x=>x.ItemInfo)
                 .Include(x=>x.CurrentBet)
                     .ThenInclude(x=>x.BetParticipant)
                 .FirstOrDefault(x => x.Id == lotId);
             if (lot is null)
                 return Result.Fail();
+            await apiService.UnholdItem(lot.ItemInfo.Id);
             ReturnBetMoney(lot);
             await MoveExpiredLotToArchive(lot.Id, LotArchiveEndType.Canceled);
             await context.SaveChangesAsync();
@@ -158,8 +176,10 @@ namespace Application.Services
         {
             if (lot.TimeUntilClosing(DateTime.Now).Ticks < 0)
             {
-                if (lot.CurrentBet is not null)
+                if (lot.CurrentBet is not null && lot.CurrentBet.BetParticipant.OriginalId is not null)
                 {
+                    if((await apiService.MoveItem(lot.ItemInfo.Id, lot.CurrentBet.BetParticipant.OriginalId)).Failed)
+                        return true;
                     DepositMoney(lot.LotOwner, lot.CurrentBet.BetAmount);
                     lot.ItemInfo.Owner = lot.CurrentBet.BetParticipant;
                     await MoveExpiredLotToArchive(lot.Id, LotArchiveEndType.Bought, lot.CurrentBet.BetAmount, lot.CurrentBet.BetParticipant);

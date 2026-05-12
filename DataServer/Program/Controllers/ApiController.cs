@@ -49,11 +49,19 @@ namespace Program.Controllers
                 return NotFound();
             return Ok();
         }
-        [HttpPost("move")]
-        public IActionResult MoveItem([FromBody] Guid itemId, Guid newOwnerId)
+        [HttpPost("unhold")]
+        public IActionResult UnholdItem([FromBody] Guid itemId)
         {
-            service.UnholdItem(itemId);
-            var result = service.MoveItem(itemId, newOwnerId);
+            var result = service.UnholdItem(itemId);
+            if (result.Failed)
+                return NotFound();
+            return Ok();
+        }
+        [HttpPost("move")]
+        public IActionResult MoveItem([FromBody] MoveItemRequest request)
+        {
+            service.UnholdItem(request.ItemId);
+            var result = service.MoveItem(request.ItemId, request.NewOwnerId);
             if (result.Failed)
                 return NotFound();
             return Ok();
