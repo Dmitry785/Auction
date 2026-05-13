@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Parbad.Builder;
+using Parbad.Gateway.ParbadVirtual;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
 
@@ -70,11 +72,26 @@ namespace Auction
                 {
                     p.RequireClaim(StaticAttributes.HasLinkedAccountPolicyClaim);
                 });
-            });
+            }); 
+            builder.Services.AddHttpContextAccessor();
+
+            builder.Services.AddParbad()
+                .ConfigureGateways(gateways =>
+                {
+                    gateways.AddParbadVirtual().WithOptions(options => options.GatewayPath = "/virtual-payment");
+                })
+                .ConfigureStorage(storage =>
+                {
+                    storage.UseMemoryCache();
+                });
+
+            builder.Services.AddMemoryCache();
 
             var app = builder.Build();
 
             app.UseMiddleware<DdosProtectionMiddleware>();
+
+            app.UseParbadVirtualGateway();
 
             app.Use(async (c, next) =>
             {

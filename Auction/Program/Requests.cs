@@ -7,10 +7,13 @@ namespace Program
     public sealed record LoginRequest([Required] string Username, [Required] string Password);
     public sealed record RegisterRequest(
         [Required]
-        string Username, 
-        [Required] 
-        string Password, 
+        string Username,
+        [Required]
+        string Password,
         string Name);
+    public sealed record PaymentRequest(decimal Amount,
+        [CurrencyTypeValidation(ErrorMessage = "rub, usd, btc, eth allowed")]
+        string AmountType);
     public sealed record CreateLotRequest([Required] TimeOnly Duration, [Required]decimal MinBetAmount, [Required][CurrencyTypeValidation] string MinBetCurrencyType
         , decimal? BuyoutAmount, [CurrencyTypeValidation]string? BuyoutCurrencyType);
 

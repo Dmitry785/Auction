@@ -53,7 +53,7 @@ namespace Program.Controllers
             if (data.Duration.Ticks < TimeSpan.FromMinutes(1).Ticks)
                 ModelState.AddModelError("Validate", "Duration must be greater than 1 min");
             if(!CurrencyTypeConverter.TryParse(data.MinBetCurrencyType, out var minBetCurrency))
-                ModelState.AddModelError("Validate", "Duration must be greater than 1 min");
+                ModelState.AddModelError("Validate", "Incorrect currency type");
             if (!ModelState.IsValid)
                 return View(data);
 

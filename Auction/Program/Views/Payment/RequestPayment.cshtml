@@ -1,0 +1,48 @@
+@model Program.PaymentRequest
+@{
+    ViewBag.Title = "Payment";
+}
+<div class="container">
+    <div asp-validation-summary="All"></div>
+    <form id="payment-form" asp-action="Login" method="post">
+        <label asp-for="Amount">Amount</label>
+        <input asp-for="Amount" />
+        <label asp-for="AmountType">Currency</label>
+        <select asp-for="AmountType">
+            <option value="rub">RUB</option>
+            <option value="usd">USD</option>
+            <option value="btc">BTC</option>
+            <option value="eth">ETH</option>
+        </select>
+    </form>
+    <button type="submit" form="payment-form">Pay</button>
+</div>
+
+<style>
+    .container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: fit-content;
+    }
+
+    #payment-form {
+        display: grid;
+        gap: 5px;
+        grid-auto-flow: row;
+        grid-template-columns: max-content 1fr;
+    }
+
+    payment-form label {
+        font-size: 20px;
+    }
+
+    payment-form input {
+        padding: 5px 30px;
+    }
+
+    .container button {
+        margin-left: auto;
+        padding: 5px 15px;
+    }
+</style>

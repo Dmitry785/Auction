@@ -15,6 +15,7 @@ namespace Infrastructure
         public DbSet<Item> Items { get; set; }
         public DbSet<Lot> Lots { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Invoice> Invoices { get; set; }
         public DbSet<ArchivalLot> ArchivalLots { get; set; }
         public AppDbContext(DbContextOptions<AppDbContext> options)
             :base(options)

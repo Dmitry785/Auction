@@ -49,6 +49,10 @@
                 <a asp-action="LinkGameAccount"></a>
             </div>
         }
+        <div class="profile-control-button profile-payment-href">
+            Donate
+            <a asp-action="requestPayment" asp-controller="payment"></a>
+        </div>
         <div class="profile-control-button">
             Logout
             <a asp-action="Logout" asp-controller="Login"></a>
@@ -57,6 +61,18 @@
 </div>
 
 <style>
+    .profile-payment-href{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1 px solid black;
+        border-radius: 3px;
+        background: lightgreen;
+    }
+    .profile-payment-href span{
+        font-size: 24px;
+        font-weight: bold;
+    }
     .profile-wallets-item span {
         text-align: center;
         font-size: 16px;
