@@ -89,7 +89,7 @@ namespace Auction
 
             var app = builder.Build();
 
-            app.UseMiddleware<DdosProtectionMiddleware>();
+            //app.UseMiddleware<DdosProtectionMiddleware>();
 
             app.UseParbadVirtualGateway();
 
@@ -98,8 +98,7 @@ namespace Auction
                 Console.WriteLine($"{c.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "unknown"} >> {c.Request.Path}");
                 if (c.Request.Headers.ContainsKey("X-Forwarded-For"))
                 {
-                    await c.Response.WriteAsync("Please, do not use X-Forwarded-For header");
-                    return;
+                    //await c.Response.WriteAsync("Please, do not use X-Forwarded-For header");
                 }
                 await next.Invoke();
             });
